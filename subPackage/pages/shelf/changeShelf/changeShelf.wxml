@@ -1,0 +1,36 @@
+<view class='flex-column height-100'>
+
+
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="调整商品货架" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+ 
+
+  <view class="flex-column p-20" style="margin-top: {{navBarHeight}}rpx;">
+
+    <view class="flex-row font-lg border-bottom p-20">
+      <text class="mr-20">商品:</text>
+      <text>{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsName}}</text>
+    </view>
+
+    <view class="flex-column">
+      <view class="p-20">货架:</view>
+      <radio-group bindchange="shelfChange">
+        <label class="radio  bg-white p-20 flex-row-between border-bottom {{shelfArr.length -1 == index ? 'is-last' :''}}" wx:for="{{shelfArr}}" wx:for-item="item">
+          <view>{{item.nxDistributerGoodsShelfName}}</view>
+          <checkbox value="{{index}}" checked="{{item.nxDistributerGoodsShelfId == shelf.nxDistributerGoodsShelfId ? 'true' : ''}}" />
+        </label>
+      </radio-group>
+
+    </view>
+
+
+
+  </view>
+
+
+
+
+<view class=" bottom_view" >
+   <view class=" p-20 center-content big_button {{canSave ? 'is-active' : ''}}"  bind:tap="{{canSave ? 'save' : ''}}">保存修改</view>
+ </view>
+
+</view>

@@ -1,0 +1,57 @@
+
+
+<view class='flex-column flex'>
+ 
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="修改商品位置" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+ 
+
+  <scroll-view scroll-y="true" style='height: {{windowHeight  -  navBarHeight - 100}}rpx;'>
+    <view class="goods-grid">
+      <block wx:for='{{shelfGoodsList}}' wx:key="nxDistributerGoodsShelfGoodsId">
+        <!-- 商品卡片 -->
+        <view 
+          class="goods-item {{draggingIndex === index ? 'dragging' : ''}} {{placeholderIndex === index && draggingIndex !== -1 && draggingIndex !== index ? 'placeholder-active' : ''}}"
+          bindtouchstart="onTouchStart"
+          catchtouchmove="onTouchMove"
+          bindtouchend="onTouchEnd"
+          bindtouchcancel="onTouchEnd"
+          data-index="{{index}}"
+        >
+          <view class="goods-content">
+            <view class="goods-name">{{item.nxDistributerGoodsEntity.nxDgGoodsName}}</view>
+            <view class="goods-standard" wx:if="{{item.nxDistributerGoodsEntity.nxDgGoodsStandardname !== '斤'}}">
+              ({{item.nxDistributerGoodsEntity.nxDgGoodsStandardname}})
+            </view>
+          </view>
+          
+          <view class="goods-actions">
+           
+            <view class="sort-input-container">
+              <input 
+                class="sort-input" 
+                type="number" 
+                value="{{item.nxDgsgSort}}" 
+                placeholder="排序"
+                data-index="{{index}}"
+                data-id="{{item.nxDistributerGoodsShelfGoodsId}}"
+                bindblur="onSortInputBlur"
+                bindconfirm="onSortInputConfirm"
+                disabled="{{draggingIndex === index}}"
+              />
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <view class="flex-column-center text-secondary font-xs" style="height: 100rpx;">没有数据了</view>
+
+  </scroll-view>
+  
+ 
+</view>
+
+
+  <view class=" bottom_view" >
+   <view class=" p-20 center-content big_button {{isChanged ? 'is-active' : ''}}" bindtap="saveChange">保存修改商品位置</view>
+ </view>

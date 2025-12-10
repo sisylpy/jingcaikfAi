@@ -1,0 +1,98 @@
+
+.filterMy{
+  border-radius: 40rpx;
+  padding: 10rpx 40rpx;
+  background: #0f8674;
+  color: #fff;
+  
+}
+.delIcon{
+  position:relative;
+  width: 40rpx;
+  height: 40rpx;
+  margin-top: -60rpx;
+  padding:  -40rpx;
+  margin-left: 20rpx;
+}
+
+
+.flex-column-center {
+  display: flex;
+  flex-flow: column nowrap;
+  /* justify-content: space-around; */
+  justify-content: center;
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.hide{
+  display: none;
+}
+
+.show{
+  display: block;
+}
+
+
+.left-item {
+  padding: 30rpx 20rpx;
+  background-color: #eee;
+}
+
+.left-active {
+  background-color: #fff;
+  border-left: 6rpx solid #167063;
+}
+
+
+.fatherGoods {
+  font-size: 26rpx;
+  text-align: center;
+  padding: 10rpx;
+  margin-right: 20rpx;
+  margin-bottom: 10rpx;
+  border: 1px solid rgb(206, 206, 206);
+  border-radius: 8rpx;
+  background-color: #fff;
+}
+
+.is-active {
+  background-color: #187e6e;
+  color: #ffffff;
+}
+
+.out_goods{
+  border-radius: 20rpx;
+  border: 1px solid gray;
+  padding: 10rpx 10rpx;
+ 
+}
+
+/* 打印按钮样式 */
+.print-button-container {
+  position: fixed;
+  top: 200rpx;
+  right: 20rpx;
+  z-index: 999;
+}
+
+.print-button {
+  width: 80rpx;
+  height: 80rpx;
+  background-color: #167063;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.2);
+}
+
+.print-button .icon {
+  width: 50rpx;
+  height: 50rpx;
+}
+
+

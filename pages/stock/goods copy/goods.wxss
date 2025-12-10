@@ -1,0 +1,118 @@
+
+.filterMy{
+  border-radius: 40rpx;
+  padding: 10rpx 40rpx;
+  /* background: #0f8674; */
+  color: #fff;
+  
+}
+.delIcon{
+  position:relative;
+  width: 40rpx;
+  height: 40rpx;
+  margin-top: -60rpx;
+  padding:  -40rpx;
+  margin-left: 20rpx;
+}
+
+
+.flex-column-center {
+  display: flex;
+  flex-flow: column nowrap;
+  /* justify-content: space-around; */
+  justify-content: center;
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.hide{
+  display: none;
+}
+
+.show{
+  display: block;
+}
+
+
+.left-item {
+  padding: 30rpx 20rpx;
+  background-color: #eee;
+}
+
+.left-active {
+  background-color: #fff;
+  border-left: 6rpx solid #167063;
+}
+
+
+.fatherGoods {
+  font-size: 26rpx;
+  text-align: center;
+  padding: 10rpx;
+  margin-right: 20rpx;
+  margin-bottom: 10rpx;
+  border: 1px solid rgb(206, 206, 206);
+  border-radius: 8rpx;
+  background-color: #fff;
+}
+
+.is-active {
+  background-color: #187e6e;
+  color: #ffffff;
+}
+
+.out_goods{
+  border-radius: 20rpx;
+  border: 1px solid gray;
+  padding: 10rpx 10rpx;
+ 
+}
+
+/* 切换按钮样式 */
+.switch-container {
+  background: #f5f5f5;
+  border-radius: 40rpx;
+  padding: 6rpx;
+  display: flex;
+  width: 320rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.switch-item {
+  flex: 1;
+  text-align: center;
+  padding: 24rpx 0;
+  border-radius: 34rpx;
+  font-size: 28rpx;
+  color: #666;
+  transition: all 0.3s;
+  position: relative;
+  font-weight: 500;
+}
+
+.switch-item.active {
+  /* background: #167063; */
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2rpx 8rpx rgba(22, 112, 99, 0.3);
+}
+
+.switch-item text {
+  display: block;
+}
+
+/* 按钮容器激活状态 */
+.button-container.active {
+  background: #167063;
+  box-shadow: 0 2rpx 8rpx rgba(22, 112, 99, 0.3);
+}
+
+.button-container .icon {
+  width: 40rpx;
+  height: 40rpx;
+}
+
+

@@ -1,0 +1,96 @@
+.container{
+  padding: 50rpx 30rpx;
+}
+
+.log{
+  /* background: blue; */
+  /* width: 150rpx;
+  height: 150rpx; */
+  margin-top: 50rpx;
+
+}
+
+.log_img {
+  width: 100rpx;
+  height: 100rpx;
+  /* margin-top: 50rpx;
+  margin-left: 50rpx; */
+
+}
+.input{
+  height: 90rpx;
+  margin-left: 16rpx;
+}
+
+
+.inputHalf{
+  height: 90rpx;
+  margin-left: 16rpx;
+}
+
+
+
+
+.word{
+  font-size: 50rpx;
+  line-height: 100rpx;
+  /* margin-bottom: 20rpx; */
+
+ 
+}
+
+.what{
+ 
+  border-radius: 10rpx;
+  border: 1px solid gray;
+}
+
+.reg_btn{
+ 
+  margin-bottom: 40rpx;
+  margin-top: 40rpx;
+ 
+}
+
+.reg_btn button{
+  /* color: #fff; */
+  border: none;
+  border: 1px solid lightgray;
+  border-radius: 0;
+  background: lightgray;
+  
+}
+.reg_btn button.is-active{
+  color: #fff;
+  background: #187e6e;
+
+}
+
+.wx_btn{
+  background: red;
+}
+
+
+.log_btn{
+  background: #187e6e;
+  color: #fff;
+
+}
+
+.log_btn button{
+  color: #fff;
+  border: none;
+  
+}
+
+
+.radio-group {
+  padding: 20rpx;
+}
+
+.radio {
+  width: 100%;
+  /* border:1px solid red; */
+  float: left;
+  line-height: 120rpx;
+}

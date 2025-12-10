@@ -1,0 +1,196 @@
+
+
+function getAttrName(string){
+  if (string) {
+    var string = string.toString(string);
+    if(string.length > 3){
+
+    string = string.substring(0, 3);
+    string = string + "..."
+    return string;
+    }else{
+      return string;
+    }
+    
+  }
+}
+
+
+function getGongli(a,b){
+  var bbb  = a / 1000;
+  return  bbb.toFixed(b);
+}
+
+function getPercent(a, b){
+  var c = ((a/b) * 100).toFixed(1) ;
+  return c;
+}
+function getProfitPercent(a,b){
+  var c =(((b - a) / a) * 100 ).toFixed(1)
+  return c;
+}
+
+
+function getAttrDate(string){
+  if (string) {
+    var string = string.toString(string);
+    string = string.substring(5, 10);
+  
+    return string; 
+  }
+}
+
+
+function getAttrFullTime(string){
+  if (string) {
+    var string = string.toString(string);
+    string = string.substring(5, 16);
+    return string; 
+  }
+}
+
+function getAttrString(string, from, long){
+  if (string) {
+    console.log("orrstr=" , string)
+    var string = string.toString(string);
+    string = string.substring(from, long);
+    console.log("==", string);
+    return string; 
+
+  }
+}
+
+
+function transferDateString(date){
+  date =  date.substring(5);
+  var str =  date.split("-");
+  var dateString = ""
+  if(str.length  == 2){
+    var yue = str[0];
+    var ri = str[1];
+    yue  =  Number(yue);
+    ri  = Number(ri);
+    dateString = yue + "月" + ri +"日"
+  }
+  return  dateString ;
+}
+
+
+function transferDateTimeString(date){
+  date =  date.substring(5);
+  var str =  date.split("-");
+  var time = str[1].split(" ");
+  console.log(time)
+  var dateString = ""
+  if(str.length  == 2){
+    var yue = str[0];
+    var ri = time[0];
+    var clock = time[1];
+    yue  =  Number(yue);
+    ri  = Number(ri);
+    colock = Number(clock)
+    dateString = yue + "月" + ri +"日" + " " + clock
+  }
+  return  dateString ;
+}
+
+
+function transferFullTimeString(date){
+  date =  date.substring(0, 10);
+  console.log("date" , date);
+  var str =  date.split("-");
+  var dateString = ""
+    var nian = str[0];
+    var yue = str[1];
+    var ri = str[2];
+    yue  =  Number(yue);
+    ri  = Number(ri);
+    dateString = nian + "年" +  yue + "月" + ri +"日" 
+  
+  return  dateString ;
+}
+
+// 格式化数量显示（支持外包装）
+// restWeight: 剩余重量（最小单位）
+// cartonUnit: 外包装单位（如：箱）
+// itemsPerCarton: 每箱数量
+// standardName: 标准单位（如：个）
+// 返回: 格式化后的字符串，如 "2箱8个"
+function formatQuantityDisplay(restWeight, cartonUnit, itemsPerCarton, standardName){
+  var stdName = '';
+  if (standardName) {
+    stdName = standardName;
+  }
+  
+  if (!restWeight) {
+    return '0' + stdName;
+  }
+  if (restWeight == 0) {
+    return '0' + stdName;
+  }
+  
+  // 转换为数字
+  var weight = parseFloat(restWeight);
+  if (isNaN(weight)) {
+    return '0' + stdName;
+  }
+  if (weight <= 0) {
+    return '0' + stdName;
+  }
+  
+  // 如果没有外包装信息，直接返回原始数量
+  if (!cartonUnit) {
+    return weight + stdName;
+  }
+  if (!itemsPerCarton) {
+    return weight + stdName;
+  }
+  
+  // 计算箱数和余数
+  var itemsPerCartonNum = parseFloat(itemsPerCarton);
+  if (isNaN(itemsPerCartonNum)) {
+    return weight + stdName;
+  }
+  if (itemsPerCartonNum <= 0) {
+    return weight + stdName;
+  }
+  
+  var cartonCount = Math.floor(weight / itemsPerCartonNum);
+  var remainder = weight % itemsPerCartonNum;
+  
+  // 格式化显示
+  var result = '';
+  if (cartonCount > 0) {
+    result = cartonCount + cartonUnit;
+  }
+  if (remainder > 0) {
+    if (result) {
+      result = result + remainder + stdName;
+    } else {
+      result = remainder + stdName;
+    }
+  }
+  
+  // 如果都是0，返回0+单位
+  if (!result) {
+    result = '0' + stdName;
+  }
+  
+  return result;
+}
+
+
+module.exports = {
+  getGongli:getGongli,
+  getPercent: getPercent,
+  getProfitPercent:getProfitPercent,
+  getAttrName: getAttrName,
+  getAttrDate: getAttrDate,
+  getAttrFullTime: getAttrFullTime,
+  transferDateString: transferDateString,
+  transferDateTimeString: transferDateTimeString,
+  transferFullTimeString: transferFullTimeString,
+  getAttrString: getAttrString,
+  formatQuantityDisplay: formatQuantityDisplay
+
+}

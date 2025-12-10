@@ -1,0 +1,73 @@
+
+
+<view class='flex-column p-20'>
+   
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="调整货架顺序" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+ 
+
+
+
+   <movable-area class='movable-area' style='display:{{movableViewInfo.showClass}}; height:{{pageInfo.scrollHeight}}vh; '>
+   <movable-view class='outer_row flex-row list-row movable-row history_item' out-of-bounds='true' damping='999'
+     style='height:{{pageInfo.rowHeight}}rpx;width: {{windowWidth}}rpx; ' direction="vertical" y="{{movableViewInfo.y}}">
+     <view class=" flex-row font-lg" style="height:{{pageInfo.rowHeight}}rpx;width: {{windowWidth - 110}}rpx; ">
+       <view  class="mr-20">{{pageInfo.startIndex+1}}.</view>
+       <view> {{movableViewInfo.shelfGoods}}</view>
+     </view>
+     <view  class="flex-column-center">
+         <image
+         data-index='{{index}}'
+               bindtouchstart='dragStart' 
+               bindtouchmove='dragMove'
+               bindtouchend='dragEnd'
+         src="../../../../images/changeorder.png" class="icon"></image>
+
+     </view>
+   </movable-view>
+ </movable-area>
+
+ <scroll-view scroll-y='{{pageInfo.scrollY}}' style='height: {{pageInfo.scrollHeight}}vh; margin-top: 200rpx;'>
+   <block wx:for='{{shelfArr}}'>
+     <view class='flex-row list-row history_item {{pageInfo.readyPlaceIndex == index ? "ready-place" : ""}}'
+       style='height: {{pageInfo.rowHeight}}rpx;'>
+       <view class="inner_row flex-row " style="width: {{windowWidth - 140}}rpx;">
+       <!-- <view class="mr-20">{{item.gbDgsgSort}}.</view> -->
+       <view class="mr-20">{{index  +1}}.</view>
+
+         <view> 
+           <text class="mr-10">{{item.nxDistributerGoodsShelfName}}</text>
+         
+         </view>
+         
+     </view>
+     <view class="flex-row" >
+      
+         <!-- <view class="flex-column-center half-row "  bindtap="deleteGoods" hover-class="hover" data-id="{{item.gbDistributerGoodsShelfGoodsId}}">
+           <image src="../../../../images/delete.png" class="icon" ></image>
+         </view> -->
+         <view class="flex-column-center "style="width: 100rpx;">
+           <image src="../../../../images/changeorder.png "   
+           data-index='{{index }}'
+               bindtouchstart='dragStart' 
+               bindtouchmove='dragMove'
+               bindtouchend='dragEnd'
+         class="icon"></image>
+
+         </view>
+        
+
+
+     </view>
+       
+     </view>
+   </block>
+
+ </scroll-view>
+ 
+
+</view>
+
+<view class=" bottom_view" >
+   <view class=" p-20 center-content big_button {{isChanged ? 'is-active' : ''}}" bindtap="saveChange">保存修改货架</view>
+ </view>
+

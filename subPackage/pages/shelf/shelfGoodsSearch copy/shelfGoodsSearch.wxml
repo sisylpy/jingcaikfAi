@@ -1,0 +1,45 @@
+
+<view class="flex flex-colum height-100">
+
+<back-navbar style="height: {{navBarHeight}}rpx;" title="搜索货架商品" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class="flex-column"  style="margin-top: {{navBarHeight}}rpx;">
+  
+<view class="flex-row ">
+  <view class="p-30" style="background-color: #f0f9ff; width: {{windowWidth - 60}}rpx;">
+    <view class="searchInput flex-row">
+      <input class="inputView" placeholder="{{placeHolder}}" bindconfirm="getSearchString" value="{{searchString}}" style="width:{{windowWidth - 160}}rpx;line-height: 60rpx; height: 60rpx; " placeholder-class="holderClass" bindinput="getString" confirm-type='search' focus="{{isSearching ? 'true':''}}"></input>
+      <view class="flex-column-center with-s-padding delSearch {{searchString.length > 0 ? 'is-show' : ''}}" bindtap="delSearch" hover-class="hover">
+        <image src="/images/close.png" class="close_icon">
+        </image>
+      </view>
+    </view>
+  </view>
+</view>
+
+
+  <view class="flex-column border-bottom bg-white  font-md mt-10" wx:for="{{disSearchArr}}" wx:key="nxDepartmentDisGoodsId" wx:for-item="shelf" wx:for-index="index" >
+    <view class="flex-row  p-20 border-bottom">
+      <text class="mr-10">货架:</text>
+      <text> {{shelf.nxDistributerGoodsShelfName}}</text>
+    </view>
+
+    <view class="flex-row-default  border-bottom p-10 font-lg"  wx:for="{{shelf.nxDisGoodsShelfGoodsEntities}}" wx:for-item="shelfGoods" wx:for-index="shelfIndex">
+       <view class="mr-10">{{shelfIndex + 1}}.</view>
+     <view class="flex-column">
+      <view class="flex-row">
+        <text class="mr-10 text-secondary">商品:</text>
+        <text>{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsName}}</text>
+      </view>
+      <view class="flex-row">
+        <text class="mr-10 text-secondary">位置:</text>
+        <text>第{{shelfGoods.nxDgsgSort}}个</text>
+      </view>
+     </view>
+     
+
+    </view>
+  </view>
+
+</view>
+  </view>
