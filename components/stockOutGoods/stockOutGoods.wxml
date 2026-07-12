@@ -6,7 +6,7 @@
 
     <view class="top">
       <view class='goodsTitle flex-row'>
-        <text class="brand" wx:if="{{item.nxDgGoodsBrand.length > 0 && item.nxDgGoodsBrand !== 'null'}}">{{item.nxDgGoodsBrand}}</text>
+        <text class="brand" wx:if="{{item.nxDgGoodsBrand && item.nxDgGoodsBrand.length > 0 && item.nxDgGoodsBrand !== 'null'}}">{{item.nxDgGoodsBrand}}</text>
         <text>{{item.nxDgGoodsName}}</text>
         <block wx:if="{{item.nxDgGoodsStandardWeight !== 'null' && item.nxDgGoodsStandardWeight.length > 0}}">
           <text  style="font-size: 30rpx;" wx:if="{{item.nxDgGoodsStandardname !== '斤'}}">({{item.nxDgGoodsStandardWeight}}/{{item.nxDgGoodsStandardname}})</text>
@@ -20,20 +20,33 @@
 
     <view class="flex-row-default p-20">
       <scroll-view scroll-y="true" class=" flex-column" style="height: {{scrollViewHeight}}rpx; width: {{windowWidth - 40}}rpx;">
-        <view class="flex-row-between p-20 border-bottom" wx:for="{{item.nxDepartmentOrdersEntities}}" wx:key="nxDepartmentOrdersId" style="font-size: 38rpx;" wx:for-item="orders" wx:for-index="orderIndex">
+        <view class="flex-row-between p-20 border-bottom {{orderIndex == focusIndex ? 'order-item-selected' : ''}}" wx:for="{{item.nxDepartmentOrdersEntities || []}}" wx:key="nxDepartmentOrdersId" style="font-size: 38rpx;" wx:for-item="orders" wx:for-index="orderIndex">
           <view class="flex-column">
             <view class="flex-row-default " style="width: {{windowWidth / 2}}rpx; align-items: flex-end;">
-              <block wx:if="{{orders.nxRestrauntEntity !== null}}">
+             
+              <block wx:if="{{orders.nxDoCollaborativeNxDisId ==  -1}}">
+                    <block wx:if="{{orders.gbDepartmentEntity !== null}}">
+                      <view class="flex-row-wrap m-10 third-row ">
+                        <text
+                          wx:if="{{orders.gbDepartmentEntity.gbDepartmentFatherId > 0}}">{{orders.gbDepartmentEntity.fatherGbDepartmentEntity.gbDepartmentName}}.</text>
+                        <text>{{orders.gbDepartmentEntity.gbDepartmentName}}</text>
+                      </view>
+                    </block>
+                   
 
-                <view class="longword m-10">{{orders.nxRestrauntEntity.nxRestrauntAttrName}}</view>
-
-              </block>
-              <block wx:elif="{{orders.gbDepartmentEntity !== null}}">
-                <view class="longword m-10">{{orders.gbDepartmentEntity.gbDepartmentName}}</view>
-              </block>
-              <block wx:else>
-                <view class="longword m-10">{{orders.nxDepartmentEntity.nxDepartmentName}}</view>
-              </block>
+                    <block wx:if="{{orders.nxDepartmentEntity !== null}}">
+                      <view class="flex-row-wrap m-10 third-row" >
+                        <text class=""
+                          wx:if="{{orders.nxDepartmentEntity.fatherDepartmentEntity !== null}}">{{orders.nxDepartmentEntity.fatherDepartmentEntity.nxDepartmentName}}.</text>
+                        <text class="longword" >{{orders.nxDepartmentEntity.nxDepartmentName}}</text>
+                      </view>
+                    </block>
+                  </block>
+                  <block wx:else="">
+                    <view class="flex-row-wrap m-10 half-row">     
+                        <text class="longword">[{{orders.nxDoCollaborativeDistributerName}}]</text>
+                      </view>
+                  </block>
 
               <view class="flex-fixed m-10" style="margin-left: 20rpx;">
                 <text>订:{{orders.nxDoQuantity}}{{orders.nxDoStandard}}</text>
@@ -54,7 +67,7 @@
 
           <view class="flex-row">
             <view class="inputView" style="margin-right: 10rpx;">
-              <input class="input" focus="{{orderIndex == 0}}" type="digit" adjust-position="true" value="{{orders.nxDoWeight == null || orders.nxDoWeight == '0.0' ? '' : orders.nxDoWeight}}" bindfocus="handleFocus" bindinput="getOrderWeight" data-index="{{orderIndex}}" style="width: {{windowWidth / 5}}rpx; " />
+              <input class="input" focus="{{orderIndex == focusIndex}}" type="digit" adjust-position="true" value="{{orders.nxDoWeight == null || orders.nxDoWeight == '0.0' ? '' : orders.nxDoWeight}}" bindfocus="handleFocus" bindinput="getOrderWeight" data-index="{{orderIndex}}" style="width: {{windowWidth / 5}}rpx; " />
             </view>
             <text>{{orders.nxDoPrintStandard}}</text>
           </view>

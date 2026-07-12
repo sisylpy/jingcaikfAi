@@ -136,7 +136,7 @@
   <view class="search-bar" style="bottom: {{keyboardOffset}}rpx; ">
     <view class="search-input-wrapper">
       <input class="search-input font-md" type="text" placeholder="搜索商品名称 / 拼音 / 别名" bindinput="getSearchStringNx" value="{{searchStr}}" bindfocus="onFocus" bindblur="onBlur" bindkeyboardheightchange="onKeyboardHeightChange" cursor-spacing="80" adjust-position="{{false}}" />
-      <view class="add-temp-btn" wx:if="{{showAddTempBtn}}" bindtap="toAddTempGoods">
+      <view class="add-temp-btn" wx:if="{{showAddTempBtn}}" bindtap="toAddTempGoods" hover-class="add-temp-btn-hover">
         <text class="add-temp-text">添加临时商品</text>
       </view>
     </view>

@@ -73,7 +73,9 @@
   border: 1px solid lightgray;
   border-radius: 10rpx;
 }
-
+.third-row{
+  width:  30%;
+}
 .gray{
   color: gray;
 }
@@ -95,6 +97,11 @@
 .flex-row-default {
   display: flex;
   flex-flow: row nowrap;
+}
+
+/* 选中状态的订单项 - 淡绿色背景 */
+.order-item-selected {
+  background-color: #f0fdf4;
 }
 
 .flex-fixed {
@@ -276,6 +283,9 @@
 }
 .m-10{
   padding: 10rpx;
+}
+.m-l-10{
+  padding: 10rpx 0;
 }
 .flex-column {
   display: flex;

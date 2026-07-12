@@ -9,8 +9,16 @@ page {
 .liziBack{
   background: #e5f8f6;
 }
+.p-20 {
+  padding: 20rpx 20rpx;
+}
+.emptyView{
+  display: none;
+}
 
-
+.emptyView.is-active{
+  display: block;
+}
 /* main 类，使用 flex 布局 */
 .main {
   display: flex;
@@ -29,6 +37,13 @@ page {
   flex-shrink: 1;
 }
 
+
+.sameShelf{
+  border:  1px solid rgb(231, 153, 8);
+  padding: 2rpx 10rpx;
+  border-radius: 10rpx;
+  font-size: 28rpx;
+}
 
 .flex-row-between {
   display: flex;

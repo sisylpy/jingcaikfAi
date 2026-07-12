@@ -1,19 +1,15 @@
-<view class="page-root1 flex flex-column">
+<view class="page flex flex-column">
 
-  <custom-navbar style="height: {{navBarHeight}}rpx;" title="客户" avatar="{{url && userInfo && userInfo.nxDiuWxAvartraUrl ? url + userInfo.nxDiuWxAvartraUrl : '/images/avatar.png'}}" button-text="设置" bindnavbuttontap="onNavButtonTap"></custom-navbar>
+  <view class="header">
+    <custom-navbar style="height: {{navBarHeight}}rpx;" title="{{userType == 2 ? customerDisInfo.nxDistributerShowName : '客户'}}" avatar="{{url && userInfo && userInfo.nxWuWxAvartraUrl ? url + userInfo.nxWuWxAvartraUrl : '/images/logo.jpg'}}" button-text="设置" bindnavbuttontap="onNavButtonTap"></custom-navbar>
 
-  <view class="content flex-1 flex-column" style=" padding-bottom: {{tabBarHeight}}rpx;">
-    <view class="flex  flex-row-between bg-white border-bottom" style=" height: {{viewBarHeight}}rpx; ">
+    <view class="flex flex-row-between bg-white border-bottom p-20" style="margin-top: {{navBarHeight  + 10}}rpx;">
       <view class="flex-row">
-
-      
         <view class=" button-container mr-30 ml-20" bind:tap="setPrint" >
-      
       <image src="{{printOk ? '/images/print-4.png' : '/images/print-3.png'}}" class="icon"></image>
-
       </view>
+
       <view class=" button-container mr-30 ml-20" bind:tap="setPaperSize" >
-      
        <text wx:if="{{paperSize == 1}}">小</text>  
        <text wx:elif="{{paperSize == 2}}">中</text>     
         <text wx:elif="{{paperSize == 3}}">大</text>         
@@ -26,17 +22,20 @@
         <image src="{{depOrdersWait  == stockCountOk ? '/images/user-group.png' : '/images/user-group-2.png'}}" class="icon"></image>
       </view>
     </view>
+  </view>
 
-    <scroll-view scroll-y="true" style="height: {{windowHeight -navBarHeight - tabBarHeight }}rpx;">
-      <view class="bg-white p-20 flex-row-between border-bottom " bindtap="choiceDep" data-type="nx" data-index="{{index}}" hover-class="hover" wx:for="{{nxDepArr}}">
+  <scroll-view class="list" scroll-y="true">
 
-        <view class="flex-column" style="width: {{windowWidth - 180}}rpx;">
+      
+      <view class="bg-white flex-row-between border-bottom " bindtap="choiceDep" data-type="nx" data-index="{{index}}" hover-class="hover" wx:for="{{nxDepArr}}" wx:key="nxDepartmentId">
+
+        <view class="flex-column p-10" style="width: {{windowWidth - 180}}rpx; ">
           <view class="flex-row">
             <!-- <text class="font-lg font-bold mainColor" wx:if="{{item.nxDepartmentPickName !== null}}">{{item.nxDepartmentPickName}}-</text> -->
-            <text class="font-lg font-bold">{{item.nxDepartmentName}}</text>
+            <text class="font-lg font-bold">{{index + 1}}.{{item.nxDepartmentAttrName}}</text>
           </view>
 
-          <view class="flex-row font-md" style="width: {{windowWidth - 180}}rpx; ">
+          <view class="flex-row font-md" style="width: {{windowWidth - 180}}rpx;margin-left: 20rpx; ">
             <view class="flex-row half-row">
               <text class="m-10">订单:</text>
               <text class="five-weight">{{item.nxDepartmentAddCount}}个</text>
@@ -54,6 +53,33 @@
         </view>
       </view>
 
+      <view class="flex-row-between p-20 border-bottom bg-white" wx:for="{{offerArr}}" wx:key="nxDistributerId" bind:tap="toNxDisOrders" data-id="{{item.nxDistributerId}}" 
+      data-name="{{item.nxDistributerShowName}}">
+     
+     <view class="flex-column">
+          <view class="flex-row" style="width: {{windowWidth - 120}}rpx; ">
+            <text class="mr-20">协作伙伴:</text>
+            <text class="font-lg">{{item.nxDistributerShowName}}</text>
+          </view>
+          <view class="flex-row" style="">
+            <view class="flex-row half-row">
+                <text class="mr-10 text-secondary ">订单:</text>
+                <text class="five-weight">{{item.aaa.orderCount}}个</text>
+              </view>
+              <view class="flex-row half-row">
+                <text class="mr-10 text-secondary ">完成出货:</text>
+                <text class="five-weight">{{item.aaa.pickCount}}个</text>
+              </view>
+          </view>
+         
+        </view>
+
+        <view class="flex-row with-mr-20">
+         
+            <image src="/images/arrow-right-3.png" class="icon"></image>
+          
+        </view>
+    </view>
 
       <view class="flex-column margin-top" wx:if="{{gbDepArr.length > 0}}">
 
@@ -96,12 +122,8 @@
 
       </view>
 
-      <view class="p-30 flex-column-center text-secondary font-sm" style="height: 100rpx;">到底了！</view>
+      <view class="p-30 flex-column-center text-secondary font-sm" style="height: 200rpx;line-height: 200rpx;">到底了！</view>
     </scroll-view>
-
-
-  </view>
-
 
 </view>
 
@@ -114,4 +136,28 @@
 
   </view>
 
+</view>
+
+<!-- 供货商客户列表侧边栏 -->
+<view class="sidebar-mask" wx:if="{{showSideBar && userType == 2}}" bindtap="closeSideBar" style="padding-top: {{navBarHeight || 88}}rpx; padding-bottom: 120rpx;">
+  <view class="sidebar-content" catchtap="stopPropagation" style="height: {{sidebarHeight || 1000}}rpx;">
+    <view class="sidebar-header">
+      <text class="sidebar-title">选择客户</text>
+      <text class="sidebar-close" bindtap="closeSideBar">×</text>
+    </view>
+    <scroll-view class="sidebar-list" scroll-y="true">
+      <view class="sidebar-item" wx:for="{{customerArr}}" wx:key="index" bindtap="selectCustomer" data-index="{{index}}">
+        <view class="sidebar-item-content">
+          <text class="sidebar-item-name">{{item.nxDistributerEntity.nxDistributerShowName || '未知客户'}}</text>
+          <text class="sidebar-item-desc" wx:if="{{item.nxDistributerEntity.nxDistributerAttrName}}">{{item.nxDistributerEntity.nxDistributerAttrName}}</text>
+        </view>
+        <view class="sidebar-item-check" wx:if="{{disId == item.nxJrdhsNxDistributerId}}">
+          <text class="check-icon">✓</text>
+        </view>
+      </view>
+      <view class="sidebar-empty" wx:if="{{!customerArr || customerArr.length == 0}}">
+        <text class="text-secondary">暂无客户</text>
+      </view>
+    </scroll-view>
+  </view>
 </view>

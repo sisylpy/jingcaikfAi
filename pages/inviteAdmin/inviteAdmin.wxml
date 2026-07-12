@@ -1,7 +1,7 @@
 
 <view class='flex flex-column height-100 bg-white'>
 
-  <custom-navbar style="height: {{navBarHeight}}rpx;" title="京采称重" avatar="{{url + userInfo.nxDiuWxAvartraUrl}}" button-text="设置" bindnavbuttontap="onNavButtonTap"></custom-navbar>
+  <custom-navbar style="height: {{navBarHeight}}rpx;" title="京采称重" avatar="{{url + userInfo.nxWuWxAvartraUrl}}" button-text="设置" bindnavbuttontap="onNavButtonTap"></custom-navbar>
 
 	<view class="flex-column " style="margin-top: {{navBarHeight}}rpx;"  >
     <view class="flex-column center-content">
@@ -27,8 +27,8 @@
        </view>
 
     <view class="flex-column-center " style="margin-top:40rpx;" >
-			<button  wx:if="{{nickName.length > 0}}" class="addBtn next" open-type="chooseAvatar"   bind:chooseavatar="onChooseAvatar" plain='true' style="width: {{windowWidth - 80}}rpx;">注册专业配送商用户开发版</button>
-      <button wx:else="" class="addBtn"  bindtap="tishi" plain='true' style="width: {{windowWidth - 80}}rpx;">注册专业配送商用户开发版</button>
+			<button  wx:if="{{nickName.length > 0}}" class="addBtn next" open-type="chooseAvatar"   bind:chooseavatar="onChooseAvatar" plain='true' style="width: {{windowWidth - 80}}rpx;">{{buttonText || '注册拣货人员'}}</button>
+      <button wx:else="" class="addBtn"  bindtap="tishi" plain='true' style="width: {{windowWidth - 80}}rpx;">{{buttonText || '注册拣货人员'}}</button>
 		</view>
 
     <view class="flex-column-center  mainBack" style="margin-top:40rpx; " >

@@ -2,7 +2,7 @@ var load = require('../../../../lib/load.js');
 var app = getApp()
 
 import {
-  disGetShelfList,
+  disGetShelfListByType,
   updateShelfSort
 
 } from '../../../../lib/apiDistributer'
@@ -56,11 +56,13 @@ Page({
   },
   _initData(){
 
-    disGetShelfList(this.data.disId)
-    .then(res =>{
+    disGetShelfListByType({
+      disId: this.data.disId,
+      shelfGoodsType: '99'
+    }).then(res =>{
       if(res.result.code == 0){
         this.setData({
-          shelfArr: res.result.data.shelfArr
+          shelfArr: res.result.data.shelfArr || []
         })
       }
     })

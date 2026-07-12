@@ -43,7 +43,6 @@ Page({
     if (value) {
       this.setData({
         userInfo: value,
-        disId: value.nxDistributerEntity.nxDistributerId,
       })
       var disValue = wx.getStorageSync('disInfo');
       if (disValue) {

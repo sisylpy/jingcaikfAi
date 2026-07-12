@@ -14,7 +14,8 @@ Page({
   },
 
   data: {
-    changeIds: false
+    changeIds: false,
+    offerArr: []
   },
 
   onLoad: function (options) {
@@ -24,10 +25,9 @@ Page({
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
       url: apiUrl.server,
       disId: options.disId,
+      supplierId: options.supplierId,
 
     })
-   
-
   },
 
 
@@ -35,6 +35,7 @@ Page({
 
     var data = {
       disId: this.data.disId,
+      supplierId: this.data.supplierId
     }
     load.showLoading("获取数据中");
     stockerGetFinishStockGoodsDeps(data).then(res => {
@@ -42,18 +43,24 @@ Page({
       load.hideLoading();
       if (res.result.code == 0) {
         console.log(res.result.data);
-        var haveIds = wx.getStorageSync('idsChangeStock');
-        console.log(haveIds);
-        if(!haveIds){
-          this.setData({
-            nxDepArr: res.result.data.nxDep,
-            gbDepArr: res.result.data.gbDep
-          })
-        }else{
-          console.log("updateupdate");
-          this._updateNxDep(res);
-          this._updateGbDep(res);
-        }
+        this.setData({
+          nxDepArr: res.result.data.nxDep,
+          gbDepArr: res.result.data.gbDep,
+          offerArr: res.result.data.offerArr
+        })
+        // var haveIds = wx.getStorageSync('idsChangeStock');
+        // console.log(haveIds);
+        // if(!haveIds){
+        //   this.setData({
+        //     nxDepArr: res.result.data.nxDep,
+        //     gbDepArr: res.result.data.gbDep,
+        //     offerArr: res.result.data.offerArr
+        //   })
+        // }else{
+        //   console.log("updateupdate");
+        //   this._updateNxDep(res);
+        //   this._updateGbDep(res);
+        // }
       } else {
         wx.showToast({
           title: res.result.msg,
@@ -64,150 +71,122 @@ Page({
   },
 
 
-  _updateGbDep(res){
-    var idsChangeStock = wx.getStorageSync('idsChangeStock');
-    var depTempArr = [];
-    var outGbDepIds = idsChangeStock.outGbDepIds;
-    if(outGbDepIds.length > 0){
-      for(var i = 0; i < outGbDepIds.length;i++){
-        var id = outGbDepIds[i];
-        var depArr = res.result.data.gbDep;
-        if(depArr.length > 0){
-          for(var j = 0; j < depArr.length; j++){
-            var item  = depArr[j];
-            var depId = item.gbDepartmentId;
-            if(id == depId){
-               item.isSelected = true;
-            }
-            depTempArr.push(depArr[i]);
-          }
-        }
-        this.setData({
-          gbDepArr: depTempArr
-        })
-      }
-    }else{
-      var depArr = res.result.data.gbDep;
-      var depTempArrNx = [];
-      if(depArr.length > 0){
-        for(var j = 0; j < depArr.length; j++){
-          var item  = depArr[j];
-           item.isSelected = false;
-           depTempArrNx.push(item);
-        }
-      }
-      this.setData({
-        gbDepArr: depTempArrNx
-      })
-    }
-  },
-
-  _updateNxDep(res){
-    var idsChangeStock = wx.getStorageSync('idsChangeStock');
-    var depTempArr = [];
-    var outNxDepIds = idsChangeStock.outNxDepIds;
-    console.log(idsChangeStock.outNxDepIds);
-    if(outNxDepIds.length > 0){
-        var depArr = res.result.data.nxDep;
-        if(depArr.length > 0){
-          for(var j = 0; j < depArr.length; j++){
-            var item  = depArr[j];
-            var depId = item.nxDepartmentId;
-            for(var i = 0; i < outNxDepIds.length;i++){
-              var id = outNxDepIds[i];
-              if(id == depId){
-                item.isSelected = true;
-             }
-            }
-            depTempArr.push(item);
-          }
-        }
-      
-      this.setData({
-        nxDepArr: depTempArr
-      })
-    }else{
-      var depArr = res.result.data.nxDep;
-      var depTempArrNx = [];
-      if(depArr.length > 0){
-        for(var j = 0; j < depArr.length; j++){
-          var item  = depArr[j];
-           item.isSelected = false;
-           depTempArrNx.push(item);
-        }
-      }
-      this.setData({
-        nxDepArr: depTempArrNx
-      })
-    
-    }
-
-  },
-
-  // selectAllDep(res){
-  //   var depArr = res.result.data.nxDep;
-  //   var depTempArrNx = [];
-  //   if(depArr.length > 0){
-  //     for(var j = 0; j < depArr.length; j++){
-  //       var item  = depArr[j];
-  //        item.isSelected = true;
-  //        depTempArrNx.push(item);
+  // _updateGbDep(res){
+  //   var idsChangeStock = wx.getStorageSync('idsChangeStock');
+  //   var depTempArr = [];
+  //   var outGbDepIds = idsChangeStock.outGbDepIds;
+  //   if(outGbDepIds.length > 0){
+  //     for(var i = 0; i < outGbDepIds.length;i++){
+  //       var id = outGbDepIds[i];
+  //       var depArr = res.result.data.gbDep;
+  //       if(depArr.length > 0){
+  //         for(var j = 0; j < depArr.length; j++){
+  //           var item  = depArr[j];
+  //           var depId = item.gbDepartmentId;
+  //           if(id == depId){
+  //              item.isSelected = true;
+  //           }
+  //           depTempArr.push(depArr[i]);
+  //         }
+  //       }
+  //       this.setData({
+  //         gbDepArr: depTempArr
+  //       })
   //     }
-  //   }
-  //   this.setData({
-  //     nxDepArr: depTempArrNx
-  //   })
-
-  //   var depArr = res.result.data.gbDep;
-  //   var depTempArrGb = [];
-  //   if(depArr.length > 0){
-  //     for(var j = 0; j < depArr.length; j++){
-  //       var item  = depArr[j];
-  //        item.isSelected = true;
-  //        depTempArrGb.push(item);
+  //   }else{
+  //     var depArr = res.result.data.gbDep;
+  //     var depTempArrNx = [];
+  //     if(depArr.length > 0){
+  //       for(var j = 0; j < depArr.length; j++){
+  //         var item  = depArr[j];
+  //          item.isSelected = false;
+  //          depTempArrNx.push(item);
+  //       }
   //     }
+  //     this.setData({
+  //       gbDepArr: depTempArrNx
+  //     })
   //   }
-  //   this.setData({
-  //     gbDepArr: depTempArrGb
-  //   })
-    
   // },
 
-  choiceDep(e) {
-    var index = e.currentTarget.dataset.index;
-    var type = e.currentTarget.dataset.type;
-    if (type == 'nx') {
-      var depData = "nxDepArr[" + index + "].isSelected";
-      var sel = this.data.nxDepArr[index].isSelected;
-      if (sel) {
-        this.setData({
-          [depData]: false
-        })
-      } else {
-        this.setData({
-          [depData]: true
-        })
-      }
-    }
+  // _updateNxDep(res){
+  //   var idsChangeStock = wx.getStorageSync('idsChangeStock');
+  //   var depTempArr = [];
+  //   var outNxDepIds = idsChangeStock.outNxDepIds;
+  //   console.log(idsChangeStock.outNxDepIds);
+  //   if(outNxDepIds.length > 0){
+  //       var depArr = res.result.data.nxDep;
+  //       if(depArr.length > 0){
+  //         for(var j = 0; j < depArr.length; j++){
+  //           var item  = depArr[j];
+  //           var depId = item.nxDepartmentId;
+  //           for(var i = 0; i < outNxDepIds.length;i++){
+  //             var id = outNxDepIds[i];
+  //             if(id == depId){
+  //               item.isSelected = true;
+  //            }
+  //           }
+  //           depTempArr.push(item);
+  //         }
+  //       }
+      
+  //     this.setData({
+  //       nxDepArr: depTempArr
+  //     })
+  //   }else{
+  //     var depArr = res.result.data.nxDep;
+  //     var depTempArrNx = [];
+  //     if(depArr.length > 0){
+  //       for(var j = 0; j < depArr.length; j++){
+  //         var item  = depArr[j];
+  //          item.isSelected = false;
+  //          depTempArrNx.push(item);
+  //       }
+  //     }
+  //     this.setData({
+  //       nxDepArr: depTempArrNx
+  //     })
+    
+  //   }
 
-    if (type == 'gb') {
-      var depData = "gbDepArr[" + index + "].isSelected";
-      var sel = this.data.gbDepArr[index].isSelected;
-      if (sel) {
-        this.setData({
-          [depData]: false
-        })
-      } else {
-        this.setData({
-          [depData]: true
-        })
-      }
-    }
+  // },
 
-    this.setData({
-      changeIds: true
-    })
-  },
+
+  // choiceDep(e) {
+  //   var index = e.currentTarget.dataset.index;
+  //   var type = e.currentTarget.dataset.type;
+  //   if (type == 'nx') {
+  //     var depData = "nxDepArr[" + index + "].isSelected";
+  //     var sel = this.data.nxDepArr[index].isSelected;
+  //     if (sel) {
+  //       this.setData({
+  //         [depData]: false
+  //       })
+  //     } else {
+  //       this.setData({
+  //         [depData]: true
+  //       })
+  //     }
+  //   }
+
+  //   if (type == 'gb') {
+  //     var depData = "gbDepArr[" + index + "].isSelected";
+  //     var sel = this.data.gbDepArr[index].isSelected;
+  //     if (sel) {
+  //       this.setData({
+  //         [depData]: false
+  //       })
+  //     } else {
+  //       this.setData({
+  //         [depData]: true
+  //       })
+  //     }
+  //   }
+
+  //   // this.setData({
+  //   //   changeIds: true
+  //   // })
+  // },
 
 
   // 已拣货客户详细
@@ -218,17 +197,31 @@ Page({
       var name = e.currentTarget.dataset.name;
       wx.navigateTo({
         url: '../depOutOrder/depOutOrder?depFatherId=' + depId
-         + '&gbDepFatherId=-1&resFatherId=-1' + '&depName=' + name,
+         + '&gbDepFatherId=-1&resFatherId=-1' + '&depName=' + name + '&supplierId='  + this.data.supplierId,
       }) 
     }else{
       var depId = e.currentTarget.dataset.id;
       var name = e.currentTarget.dataset.name;
       wx.navigateTo({
-        url: '../depOutOrder/depOutOrder?depFatherId==1&gbDepFatherId='+ depId + '&resFatherId=-1'+'&depName=' + name,
+        url: '../depOutOrder/depOutOrder?depFatherId==1&gbDepFatherId='+ depId + '&resFatherId=-1'+'&depName=' + name
+        + '&supplierId='  + this.data.supplierId,
       }) 
     }
       
   },
+
+
+
+  toNxDisOrders(e){
+    wx.navigateTo({
+      url: '../collNxOutOrder/collNxOutOrder?collNxDisId=' + e.currentTarget.dataset.id 
+       +'&disId=' + this.data.disId,
+    })
+  },
+
+  
+
+
 
 
   toBack() {

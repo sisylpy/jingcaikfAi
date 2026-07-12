@@ -2,8 +2,8 @@
   <block wx:for="{{list}}" wx:key="index">
     <view class="tab-bar-item {{selected === index ? 'active' : ''}}" data-index="{{index}}" data-path="{{item.pagePath}}" bindtap="switchTab" hover-class="hover">
 
-    <view class="smallDotJrdh {{index == 0 && stockCount > 0 ? 'is-active' : ''}}  {{index == 0 && stockCount  == stockCountOk ? 'is-gray' : ''}} " style="margin-left: 20%;">{{stockCount}}</view>
-    <view class="smallDotJrdh {{index == 1 && wxCount > 0 ? 'is-active' : ''}}  {{index == 1 && wxCount  == wxCountOk ? 'is-gray' : ''}} " style="margin-left: 28%;">{{wxCount}}</view>
+    <view class="smallDotJrdh {{index == 0 && depCount > 0 ? 'is-active' : ''}} " style="margin-left: {{list.length == 2 ? '28%;' :'20%;' }}">{{depCount}}</view>
+    <view class="smallDotJrdh {{index == 1 && stockCount > 0 ? 'is-active' : ''}}" style="margin-left: {{list.length == 2 ? '28%;' :'20%;' }}">{{stockCount}}</view>
       <image class="tab-bar-icon" src="{{selected === index ? item.selectedIconPath : item.iconPath}}" mode="aspectFit"></image>
       <text class="tab-bar-text">{{item.text}}</text>
     </view>

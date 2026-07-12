@@ -1,12 +1,14 @@
 {
   "pages": [
     "pages/order/index/index",
-    "pages/stock/index/index",
-    "pages/stock/indexShelf/indexShelf",
-    "pages/stock/goods/goods",
+    "pages/order/shelf/shelf",
+    "pages/order/shelfColl/shelfColl",
+    "pages/order/catagray/catagray",
+    "pages/order/catagrayColl/catagrayColl",
+    "pages/total/goods/goods",
     "pages/purchase/index/index",
     "pages/inviteAdmin/inviteAdmin",
-    "pages/login/login",
+    "pages/loginWarn/loginWarn",
     "pages/disUserEdit/disUserEdit",
     "pages/shelf/index/index",
     "pages/printer/printer"
@@ -18,16 +20,20 @@
 
       "pages/prepare/orderDepList/orderDepList",
       "pages/prepare/land/land",
+      "pages/goods/disAddGoodsLinshi/disAddGoodsLinshi",
       "pages/prepare/depOutOrder/depOutOrder",
+      "pages/prepare/collNxOutOrder/collNxOutOrder",
       "pages/shelf/editShelf/editShelf",
       "pages/shelf/resGoodsListShelf/resGoodsListShelf",
       "pages/shelf/shelfGoodsSort/shelfGoodsSort",
       "pages/shelf/changeShelf/changeShelf",
+      "pages/shelf/changeShelfLayer/changeShelfLayer",
       "pages/shelf/disAddGoodsShelf/disAddGoodsShelf",
       "pages/shelf/shelfGoodsSearch/shelfGoodsSearch"
     
     ]
     }],
+    
   "tabBar": {
     "custom": true,
     "color": "#999999",
@@ -39,7 +45,7 @@
         "iconPath": "/images/icons/icon_goods.png",
         "selectedIconPath": "/images/icons/icon_goods_active.png"
       }, {
-        "pagePath": "pages/stock/goods/goods",
+        "pagePath": "pages/total/goods/goods",
         "text": "未出库",
         "iconPath": "/images/icons/icon_goods.png",
         "selectedIconPath": "/images/icons/icon_goods_active.png"

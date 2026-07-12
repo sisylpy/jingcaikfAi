@@ -4,10 +4,11 @@
 let self;
 const app = getApp()
 var load = require('../../../../lib/load.js');
+import apiUrl from '../../../../config.js'
 
 import {
- 
   getShelfGoods,
+  getShelfGoodsByLayer,
   updateShelfGoodsSort,
   deleteShelfGoods
 } from '../../../../lib/apiDistributer'
@@ -21,28 +22,62 @@ Page({
     hide: false,
     scrollTop: 0,
     // 拖拽相关
-    draggingIndex: -1,        // 当前拖拽的商品索引
-    dragStartY: 0,            // 拖拽开始的Y坐标
-    dragStartX: 0,            // 拖拽开始的X坐标
-    dragCurrentY: 0,         // 当前拖拽的Y坐标
-    dragCurrentX: 0,         // 当前拖拽的X坐标
-    placeholderIndex: -1,    // 占位符位置索引
-    itemWidth: 0,            // 每个商品卡片的宽度
-    itemHeight: 0,           // 每个商品卡片的高度
-    gridColumns: 3           // 网格列数
+    draggingIndex: -1,        // 正在拖拽的卡片 index
+    placeholderIndex: -1,      // 目标位置 index
+    isDragging: false,         // 是否正在拖拽
+    dragPageX: 0,              // 当前手指 pageX
+    dragPageY: 0,              // 当前手指 pageY
+    // 网格布局参数（列表一行一个，拖拽按单列计算）
+    gridColumns: 1,
+    itemWidth: 0,              // 单个卡片宽度
+    itemHeight: 0,             // 单个卡片高度
+    containerTop: 0,           // 网格容器 top
+    containerLeft: 0,          // 网格容器 left
+    // 长按相关
+    longPressTimer: null,      // 长按定时器
+    touchStartIndex: -1,       // 触摸开始的索引
+    // 是否禁止滚动
+    disableScroll: false,       // 拖拽时禁止滚动
+    // 层级文本映射
+    layerTextMap: {
+      1: '第一层结束',
+      2: '第二层结束',
+      3: '第三层结束',
+      4: '第四层结束',
+      5: '第五层结束',
+      6: '第六层结束',
+      7: '第七层结束',
+      8: '第八层结束',
+      9: '第九层结束',
+    },
+    sortPageTitle: '修改商品位置',
+    shelfLayer: null,
+    url: '',
   },
+  
+  // 初始化滚动位置缓存
+  _currentScrollTop: 0,
+  _scrollQueryTimer: null,
 
   /**
   * 生命周期函数--监听页面加载
   */
   onLoad: function (options) {
     const globalData = app.globalData;
+    const layerOpt = options.layer;
+    const shelfLayer = layerOpt !== undefined && layerOpt !== null && layerOpt !== ''
+      ? parseInt(layerOpt, 10)
+      : null;
+    const validLayer = shelfLayer !== null && !isNaN(shelfLayer) && shelfLayer > 0 ? shelfLayer : null;
 
     this.setData({
       windowWidth: globalData.windowWidth * globalData.rpxR,
       windowHeight: globalData.windowHeight * globalData.rpxR,
       shelfId: options.shelfId,
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
+      shelfLayer: validLayer,
+      sortPageTitle: validLayer ? ('第' + validLayer + '层 · 调整位置') : '修改商品位置',
+      url: apiUrl.server,
     })
     self = this;
 
@@ -50,24 +85,85 @@ Page({
     
   },
 
+  /** 接口若扁平化字段，补全 nxDistributerGoodsEntity；层内排序号优先 nxDgsgShelfLayerSeq，缺省时用 nxDgsgSort */
+  _normalizeShelfGoodsList(list) {
+    if (!Array.isArray(list)) return [];
+    return list.map((item) => {
+      if (!item) return item;
+      let row = { ...item };
+      if (!row.nxDistributerGoodsEntity) {
+        row.nxDistributerGoodsEntity = {
+          nxDgGoodsName: item.nxDgGoodsName,
+          nxDgGoodsBrand: item.nxDgGoodsBrand,
+          nxDgGoodsStandardname: item.nxDgGoodsStandardname,
+          nxDgGoodsStandardWeight: item.nxDgGoodsStandardWeight,
+          nxDgGoodsFile: item.nxDgGoodsFile,
+          nxDgGoodsFileLarge: item.nxDgGoodsFileLarge,
+          nxDgNxGoodsId: item.nxDgNxGoodsId,
+          nxDgItemsPerCarton: item.nxDgItemsPerCarton,
+          nxDgCartonUnit: item.nxDgCartonUnit,
+        };
+      }
+      const seq = row.nxDgsgShelfLayerSeq;
+      if (seq == null || seq === '') {
+        if (row.nxDgsgSort != null && row.nxDgsgSort !== '') {
+          row.nxDgsgShelfLayerSeq = row.nxDgsgSort;
+        }
+      }
+      return row;
+    });
+  },
+
   _getInitData(){
    load.showLoading("获取商品中")
-   getShelfGoods({
-     shelfId: this.data.shelfId,
-     page: 1,
-     limit: 500
-   })
+   const shelfId = this.data.shelfId;
+   const layer = this.data.shelfLayer;
+
+   if (layer != null) {
+     getShelfGoodsByLayer(shelfId, layer)
+       .then(res => {
+         if (res.result.code == 0) {
+           load.hideLoading();
+           const respData = res.result.data || {};
+           const goodsList = this._normalizeShelfGoodsList(Array.isArray(respData.goods) ? respData.goods : []);
+           this.setData({
+             shelfGoodsList: goodsList,
+           }, () => {
+             this._measureGrid();
+           });
+         } else {
+           load.hideLoading();
+           wx.showToast({
+             title: res.result.msg || '获取商品失败',
+             icon: 'none'
+           });
+         }
+       })
+       .catch(() => {
+         load.hideLoading();
+       });
+     return;
+   }
+
+   var data = {
+    shelfId: shelfId,
+    page: 1,
+    limit: 500,
+    shelfGoodsType: '99'
+   }
+   getShelfGoods(data)
     .then(res =>{
       if(res.result.code == 0){
         load.hideLoading();
         console.log(res);
        const respData = res.result.data || res.result.page || {};
-       const goodsList = Array.isArray(respData.list) ? respData.list : (Array.isArray(respData) ? respData : []);
+       const rawList = Array.isArray(respData.list) ? respData.list : (Array.isArray(respData) ? respData : []);
+       const goodsList = this._normalizeShelfGoodsList(rawList);
        this.setData({
          shelfGoodsList: goodsList,
        }, () => {
-         // 计算商品卡片尺寸
-         this._calculateItemSize();
+         // 测量一次网格尺寸
+         this._measureGrid();
        }) 
       }else{
         load.hideLoading();
@@ -76,18 +172,31 @@ Page({
     })  
   },
 
-  // 计算商品卡片尺寸
-  _calculateItemSize: function() {
+  // 测量网格尺寸（只测量一次）
+  _measureGrid: function() {
     const query = wx.createSelectorQuery();
+    // 测量网格容器和单个商品卡片
+    query.select('.goods-container').boundingClientRect();
     query.select('.goods-item').boundingClientRect();
     query.exec((res) => {
-      if (res && res[0]) {
-        const item = res[0];
-        this.setData({
-          itemWidth: item.width,
-          itemHeight: item.height
-        });
-      }
+      if (!res || !res[0] || !res[1]) return;
+      
+      const container = res[0];
+      const item = res[1];
+      
+      this.setData({
+        containerTop: container.top,
+        containerLeft: container.left,
+        itemWidth: item.width,
+        itemHeight: item.height
+      });
+      
+      console.log('网格尺寸测量完成:', {
+        containerTop: container.top,
+        containerLeft: container.left,
+        itemWidth: item.width,
+        itemHeight: item.height
+      });
     });
   },
 
@@ -96,140 +205,196 @@ Page({
     const index = parseInt(e.currentTarget.dataset.index);
     const touch = e.touches[0];
     
+    // 清掉之前的长按定时器
+    if (this.data.longPressTimer) {
+      clearTimeout(this.data.longPressTimer);
+    }
+    
     this.setData({
-      draggingIndex: index,
-      dragStartX: touch.clientX,
-      dragStartY: touch.clientY,
-      dragCurrentX: touch.clientX,
-      dragCurrentY: touch.clientY
+      touchStartIndex: index,
+      dragPageX: touch.pageX,
+      dragPageY: touch.pageY,
+      draggingIndex: -1,
+      placeholderIndex: -1,
+      isDragging: false
     });
+    
+    // 200ms 长按后进入拖拽
+    const timer = setTimeout(() => {
+      if (this.data.touchStartIndex === index) {
+        this.setData({
+          draggingIndex: index,
+          placeholderIndex: index,
+          isDragging: true,
+          disableScroll: true   // 拖拽时关掉滚动
+        });
+        wx.vibrateShort({ type: 'medium' });
+      }
+    }, 200);
+    
+    this.setData({ longPressTimer: timer });
   },
 
   // 触摸移动
   onTouchMove: function(e) {
-    if (this.data.draggingIndex === -1) return;
-    
     const touch = e.touches[0];
-    const deltaX = touch.clientX - this.data.dragStartX;
-    const deltaY = touch.clientY - this.data.dragStartY;
+    const pageX = touch.pageX;
+    const pageY = touch.pageY;
     
-    // 如果移动距离太小，不触发拖拽
-    if (Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) {
+    // 如果正在拖拽，处理拖拽逻辑（滚动已通过 scroll-y 控制，不需要 stopPropagation）
+    if (this.data.isDragging) {
+      this.setData({
+        dragPageX: pageX,
+        dragPageY: pageY
+      });
+      // 根据坐标计算目标 index
+      this._updatePlaceholderByPosition(pageX, pageY);
       return;
     }
     
-    this.setData({
-      dragCurrentX: touch.clientX,
-      dragCurrentY: touch.clientY
-    });
-    
-    // 节流计算目标位置（避免频繁查询DOM）
-    if (!this._throttleTimer) {
-      this._throttleTimer = setTimeout(() => {
-        this._calculateTargetIndex(touch.clientX, touch.clientY);
-        this._throttleTimer = null;
-      }, 50);
+    // 如果没有进入拖拽状态，检查是否应该取消长按（如果移动距离较大，可能是滚动）
+    if (this.data.touchStartIndex !== -1) {
+      const deltaX = Math.abs(pageX - this.data.dragPageX);
+      const deltaY = Math.abs(pageY - this.data.dragPageY);
+      const moveDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      
+      // 如果移动距离超过 10px，可能是滚动，取消长按定时器
+      if (moveDistance > 10) {
+        if (this.data.longPressTimer) {
+          clearTimeout(this.data.longPressTimer);
+          this.setData({
+            longPressTimer: null,
+            touchStartIndex: -1
+          });
+        }
+      }
     }
   },
 
   // 触摸结束
   onTouchEnd: function(e) {
-    if (this.data.draggingIndex === -1) return;
-    
-    // 清除节流定时器
-    if (this._throttleTimer) {
-      clearTimeout(this._throttleTimer);
-      this._throttleTimer = null;
+    // 清定时器
+    if (this.data.longPressTimer) {
+      clearTimeout(this.data.longPressTimer);
+      this.setData({ longPressTimer: null });
     }
     
-    const targetIndex = this.data.placeholderIndex !== -1 ? this.data.placeholderIndex : this.data.draggingIndex;
-    
-    if (targetIndex !== this.data.draggingIndex && targetIndex !== -1) {
-      // 执行排序
-      this._moveItem(this.data.draggingIndex, targetIndex);
+    // 清除滚动查询定时器
+    if (this._scrollQueryTimer) {
+      clearTimeout(this._scrollQueryTimer);
+      this._scrollQueryTimer = null;
     }
     
-    // 重置拖拽状态
+    // 非拖拽状态直接重置
+    if (!this.data.isDragging) {
+      this.setData({
+        touchStartIndex: -1
+      });
+      return;
+    }
+    
+    // 拖拽完成，重置状态
     this.setData({
+      isDragging: false,
       draggingIndex: -1,
       placeholderIndex: -1,
-      dragStartX: 0,
-      dragStartY: 0,
-      dragCurrentX: 0,
-      dragCurrentY: 0
+      touchStartIndex: -1,
+      disableScroll: false      // 恢复滚动
     });
   },
 
-  // 计算目标索引位置
-  _calculateTargetIndex: function(clientX, clientY) {
-    const query = wx.createSelectorQuery();
-    query.selectAll('.goods-item').boundingClientRect();
-    query.selectViewport().scrollOffset();
-    query.exec((res) => {
-      if (!res || !res[0] || res[0].length === 0) return;
-      
-      const items = res[0];
-      const scrollTop = res[1].scrollTop;
-      const adjustedY = clientY + scrollTop;
-      
-      // 计算当前触摸点对应的商品索引
-      let targetIndex = -1;
-      let minDistance = Infinity;
-      
-      for (let i = 0; i < items.length; i++) {
-        // 跳过正在拖拽的商品
-        if (i === this.data.draggingIndex) continue;
-        
-        const item = items[i];
-        const centerX = item.left + item.width / 2;
-        const centerY = item.top + item.height / 2;
-        
-        // 计算触摸点到商品中心的距离
-        const distance = Math.sqrt(
-          Math.pow(clientX - centerX, 2) + Math.pow(adjustedY - centerY, 2)
-        );
-        
-        // 如果触摸点在商品区域内，或者距离最近
-        if ((clientX >= item.left && clientX <= item.right &&
-             adjustedY >= item.top && adjustedY <= item.bottom) ||
-            distance < minDistance) {
-          if (distance < minDistance) {
-            minDistance = distance;
-            targetIndex = i;
-          }
-        }
-      }
-      
-      if (targetIndex !== -1 && targetIndex !== this.data.draggingIndex) {
-        this.setData({
-          placeholderIndex: targetIndex
+  // 根据坐标计算目标索引位置
+  _updatePlaceholderByPosition: function(pageX, pageY) {
+    const {
+      containerTop,
+      containerLeft,
+      itemWidth,
+      itemHeight,
+      gridColumns,
+      shelfGoodsList,
+      draggingIndex
+    } = this.data;
+    
+    if (!itemWidth || !itemHeight) return;
+    
+    // 使用节流减少滚动位置查询频率
+    if (!this._scrollQueryTimer) {
+      this._scrollQueryTimer = setTimeout(() => {
+        const query = wx.createSelectorQuery();
+        query.selectViewport().scrollOffset();
+        query.exec((res) => {
+          const scrollTop = res && res[0] ? res[0].scrollTop : 0;
+          this._currentScrollTop = scrollTop;
+          this._scrollQueryTimer = null;
+          this._calculateTargetIndexByPosition(pageX, pageY, scrollTop);
         });
-      } else if (targetIndex === -1) {
-        // 如果没有找到目标位置，清除占位符
-        this.setData({
-          placeholderIndex: -1
-        });
-      }
-    });
+      }, 50);
+    } else {
+      // 如果正在查询，使用上次的滚动位置
+      this._calculateTargetIndexByPosition(pageX, pageY, this._currentScrollTop || 0);
+    }
+  },
+  
+  // 根据坐标和滚动位置计算目标索引
+  _calculateTargetIndexByPosition: function(pageX, pageY, scrollTop) {
+    const {
+      containerTop,
+      containerLeft,
+      itemWidth,
+      itemHeight,
+      gridColumns,
+      shelfGoodsList,
+      draggingIndex
+    } = this.data;
+    
+    // 计算相对于容器的坐标
+    const localX = pageX - containerLeft;
+    const localY = pageY - containerTop + scrollTop;
+    
+    if (localX < 0 || localY < 0) return;
+    
+    // 计算行列
+    let col = Math.floor(localX / itemWidth);
+    let row = Math.floor(localY / itemHeight);
+    
+    // 边界检查
+    if (col < 0) col = 0;
+    if (col >= gridColumns) col = gridColumns - 1;
+    if (row < 0) row = 0;
+    
+    // 计算目标索引
+    let targetIndex = row * gridColumns + col;
+    
+    if (targetIndex >= shelfGoodsList.length) {
+      targetIndex = shelfGoodsList.length - 1;
+    }
+    
+    // 如果目标位置和当前占位符位置相同，或者和拖拽索引相同，不处理
+    if (targetIndex === this.data.placeholderIndex || targetIndex === draggingIndex) {
+      return;
+    }
+    
+    // 实时移动元素，让出位置
+    this._moveItem(draggingIndex, targetIndex);
   },
 
-  // 移动商品到新位置
+  // 移动商品到新位置（实时重排）
   _moveItem: function(fromIndex, toIndex) {
-    const shelfGoodsList = this.data.shelfGoodsList.slice();
-    const item = shelfGoodsList[fromIndex];
+    if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return;
     
-    // 移除原位置
-    shelfGoodsList.splice(fromIndex, 1);
-    // 插入新位置
-    shelfGoodsList.splice(toIndex, 0, item);
+    const list = this.data.shelfGoodsList.slice();
+    const item = list.splice(fromIndex, 1)[0];
+    list.splice(toIndex, 0, item);
     
-    // 更新排序号
-    for (let i = 0; i < shelfGoodsList.length; i++) {
-      shelfGoodsList[i].nxDgsgSort = i + 1;
+    // 重新编号（层内序）
+    for (let i = 0; i < list.length; i++) {
+      list[i].nxDgsgShelfLayerSeq = i + 1;
     }
     
     this.setData({
-      shelfGoodsList: shelfGoodsList,
+      shelfGoodsList: list,
+      draggingIndex: toIndex,
+      placeholderIndex: toIndex,
       isChanged: true
     });
   },
@@ -282,7 +447,7 @@ Page({
     }
     
     console.log('当前商品名称:', currentItem.nxDistributerGoodsEntity.nxDgGoodsName);
-    console.log('当前商品原排序:', currentItem.nxDgsgSort);
+    console.log('当前商品原层内序:', currentItem.nxDgsgShelfLayerSeq);
     console.log('当前商品实际索引:', currentIndex);
     
     // 显示网格布局的索引映射
@@ -306,7 +471,7 @@ Page({
     shelfGoodsList.forEach((item, idx) => {
       var row = Math.floor(idx / 4) + 1;
       var col = (idx % 4) + 1;
-      console.log(`  ${idx + 1}. ${item.nxDistributerGoodsEntity.nxDgGoodsName} (排序:${item.nxDgsgSort}) [第${row}行第${col}列]`);
+      console.log(`  ${idx + 1}. ${item.nxDistributerGoodsEntity.nxDgGoodsName} (层内序:${item.nxDgsgShelfLayerSeq}) [第${row}行第${col}列]`);
     });
     
     // 如果输入的值超出范围，提示错误
@@ -340,22 +505,22 @@ Page({
     shelfGoodsList.forEach((item, idx) => {
       var row = Math.floor(idx / 4) + 1;
       var col = (idx % 4) + 1;
-      console.log(`  ${idx + 1}. ${item.nxDistributerGoodsEntity.nxDgGoodsName} (排序:${item.nxDgsgSort}) [第${row}行第${col}列]`);
+      console.log(`  ${idx + 1}. ${item.nxDistributerGoodsEntity.nxDgGoodsName} (层内序:${item.nxDgsgShelfLayerSeq}) [第${row}行第${col}列]`);
     });
     
-    // 更新所有项的排序号
+    // 更新所有项的层内序
     console.log('🔄 开始重新编号...');
     for (var i = 0; i < shelfGoodsList.length; i++) {
-      var oldSort = shelfGoodsList[i].nxDgsgSort;
-      shelfGoodsList[i].nxDgsgSort = i + 1;
-      console.log(`   ${shelfGoodsList[i].nxDistributerGoodsEntity.nxDgGoodsName}: ${oldSort} → ${i + 1}`);
+      var oldSeq = shelfGoodsList[i].nxDgsgShelfLayerSeq;
+      shelfGoodsList[i].nxDgsgShelfLayerSeq = i + 1;
+      console.log(`   ${shelfGoodsList[i].nxDistributerGoodsEntity.nxDgGoodsName}: ${oldSeq} → ${i + 1}`);
     }
     
     console.log('📋 重新编号后商品列表:');
     shelfGoodsList.forEach((item, idx) => {
       var row = Math.floor(idx / 4) + 1;
       var col = (idx % 4) + 1;
-      console.log(`  ${idx + 1}. ${item.nxDistributerGoodsEntity.nxDgGoodsName} (排序:${item.nxDgsgSort}) [第${row}行第${col}列]`);
+      console.log(`  ${idx + 1}. ${item.nxDistributerGoodsEntity.nxDgGoodsName} (层内序:${item.nxDgsgShelfLayerSeq}) [第${row}行第${col}列]`);
     });
     
     this.setData({
@@ -370,7 +535,7 @@ Page({
       this.data.shelfGoodsList.forEach((item, idx) => {
         var row = Math.floor(idx / 4) + 1;
         var col = (idx % 4) + 1;
-        console.log(`  ${idx + 1}. ${item.nxDistributerGoodsEntity.nxDgGoodsName} (排序:${item.nxDgsgSort}) [第${row}行第${col}列]`);
+        console.log(`  ${idx + 1}. ${item.nxDistributerGoodsEntity.nxDgGoodsName} (层内序:${item.nxDgsgShelfLayerSeq}) [第${row}行第${col}列]`);
       });
       console.log('=== 排序操作完成 ===');
     }, 100);
@@ -381,7 +546,7 @@ Page({
     var temp = [];
     for(var i = 0; i < arr.length; i++){
       var item = arr[i];
-      item.nxDgsgSort = i + 1;
+      item.nxDgsgShelfLayerSeq = i + 1;
       temp.push(item);
     }
     load.showLoading("保存修改商品")

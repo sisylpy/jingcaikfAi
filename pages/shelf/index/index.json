@@ -1,7 +1,7 @@
 {
   "usingComponents": {
    
-    "back-navbar": "/components/back-navbar/back-navbar",
+    "custom-navbar": "/components/custom-navbar/custom-navbar",
     "addShelf": "/components/addShelf/addShelf",
     "myDismodal": "/components/myDismodal/myDismodal",
     "disPlanPurchase" : "/components/disPlanPurchase/disPlanPurchase",

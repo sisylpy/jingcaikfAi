@@ -37,13 +37,13 @@
 
 .smallDotJrdh{
   position: absolute;
-  width: 40rpx;
+  width: 60rpx;
   height: 40rpx;
   line-height: 40rpx;
   /* margin-bottom: 40rpx;
   margin-left: 190rpx; */
   margin-bottom: 60rpx;
-  border-radius: 50%;
+  border-radius: 40rpx;
   background-color: #0f8674;
   color: #fff;
   font-size: 24rpx;

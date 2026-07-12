@@ -8,10 +8,11 @@ const viewBarHeight = 60;
 
 import {
   stockerGetWaitStockGoodsDeps,
+  supplierGetWaitStockGoodsDeps
 } from '../../../lib/apiDistributer.js'
 
 import {
-  disLoginKf
+  weighterLoginKf
 } from '../../../lib/apiDistributer'
 
 Page({
@@ -21,30 +22,28 @@ Page({
     update: false,
     changeIds: false,
     printOk: false,
-    paperSize: 1 // 默认小尺寸：4*3cm
+    paperSize: 1, // 默认小尺寸：4*3cm
+    showSideBar: false // 是否显示左侧边栏（供货商客户列表）
   },
 
-  onLoad() {
-    // 页面首次加载时，确保用户信息和 disInfo 已存储到缓存，并更新 tabBar
-    var value = wx.getStorageSync('userInfo');
-    if (value) {
-      var disInfo = value.nxDistributerEntity;
-      
-      // 立即存储 disInfo 到缓存，确保 tabBar 能获取到
-      if (disInfo) {
-        wx.setStorageSync('disInfo', disInfo);
-      }
-      
-      // 延迟一下，确保 tabBar 组件已经初始化完成
-      setTimeout(() => {
-        // 主动更新 tabBar 列表（确保程序刚打开时也能正确显示）
-        if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-          if (typeof this.getTabBar().updateTabBarList === 'function') {
-            this.getTabBar().updateTabBarList();
-          }
-        }
-      }, 100);
+  onLoad(options) {
+    // 如果 options 传了参数，先缓存起来
+    if (options.disId || options.supplierId) {
+      const cachedSupplierCustomer = {
+        disId: options.disId,
+        supplierId: options.supplierId,
+        userId: options.userId,
+        userType: options.userType
+      };
+      wx.setStorageSync('supplierCustomer', cachedSupplierCustomer);
     }
+
+    this.setData({
+      userId: options.userId,
+      disId: options.disId,
+      supplierId: options.supplierId,
+      userType: options.userType
+    });
   },
 
   onShow() {
@@ -56,67 +55,8 @@ Page({
       })
     }
 
-    var value = wx.getStorageSync('userInfo');
-    if (value) {
-      var disInfo = value.nxDistributerEntity;
-      this.setData({
-        userInfo: value,
-        disId: value.nxDistributerEntity.nxDistributerId,
-        disInfo: disInfo,
-        disBusinessType: value.nxDistributerBusinessTypeId 
-      })
-
-      // 立即存储 disInfo 到缓存，确保 tabBar 能获取到
-      if (disInfo) {
-        wx.setStorageSync('disInfo', disInfo);
-      }
-
-      // 主动更新 tabBar 列表（确保程序刚打开时也能正确显示）
-      if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-        if (typeof this.getTabBar().updateTabBarList === 'function') {
-          this.getTabBar().updateTabBarList();
-        }
-      }
-
-      this._getTodayCustomer();
-     
-    } else {
-      this._login();
-    }
-    
-    // 检查是否有缓存的打印机设备ID，如果有则自动连接
-    this.checkAndConnectPrinter();
-    
-    // 读取缓存的标签尺寸
-    var cachedPaperSize = wx.getStorageSync('paperSize');
-    if (cachedPaperSize) {
-      this.setData({
-        paperSize: cachedPaperSize
-      });
-    }
-
-    const app = getApp();
-    const navBarHeight = app.globalData.navBarHeight;
-    const screenHeight = app.globalData.screenHeight;
-    const screenWidth = app.globalData.screenWidth;
-    const rpxRatio = 750 / screenWidth;
-    const navBarHeightRpx = navBarHeight * rpxRatio;
-    const viewBarHeightRpx = viewBarHeight * rpxRatio;
-    const tabBarHeightRpx = 100;
-    const contentHeight = (screenHeight - navBarHeight - tabBarHeight - viewBarHeight) * rpxRatio;
-    console.log("godosoososso", globalData);
-    this.setData({
-      contentHeight: contentHeight,
-      navBarHeight: navBarHeightRpx,
-      tabBarHeight: tabBarHeightRpx,
-      viewBarHeight: viewBarHeightRpx,
-      leftMenuWidth: 150, // 左侧菜单宽度，单位 rpx
-      windowWidth: globalData.windowWidth * globalData.rpxR,
-      windowHeight: globalData.windowHeight * globalData.rpxR,
-      statusBarHeight: globalData.statusBarHeight * globalData.rpxR,
-      navBarHeight: globalData.navBarHeight * globalData.rpxR,
-      url: apiUrl.server, // 设置服务器地址，用于图片路径拼接（合并到一次 setData）
-    })
+  
+    this._login();
   },
 
   // 页面级别的下拉刷新处理函数
@@ -187,38 +127,102 @@ Page({
         load.hideLoading();
 
         var disUser = {
-          nxDiuCode: res.code,
+          nxWuLoginCode: res.code,
         }
         load.showLoading("登录中")
-        disLoginKf(disUser)
+        weighterLoginKf(disUser)
           .then((res) => {
             load.hideLoading();
             console.log(res.result.data);
-            if (res.result.code !== -1) { //登陆成功
-              this.setData({
-                userInfo: res.result.data.userInfo,
-                disInfo: res.result.data.disInfo,
-                disId: res.result.data.disInfo.nxDistributerId,
-              })
-
+            if (res.result.code !== -1) { //登陆成功（内部员工）
+              // 登录成功后存储缓存
               wx.setStorageSync('userInfo', res.result.data.userInfo);
-              wx.setStorageSync('disInfo', res.result.data.disInfo);
-             
-              that._getTodayCustomer()
-           
-            } else {
+              if(res.result.data.userType == 1){
+               
+                wx.setStorageSync('disInfo', res.result.data.disInfo);
+                this.setData({
+                  userType : res.result.data.userType,
+                  userInfo: res.result.data.userInfo,
+                  supplierId: -1,
+                  disInfo: res.result.data.disInfo
+                })
+                that._initPage(res.result.data.userInfo, res.result.data.disInfo);
 
-               // 登陆失败
-              // wx.showModal({
-              //   title: res.result.msg,
-              //   content: "请注册",
-              //   showCancel: false,
-              //   confirmText: "知道了",
-              // })
+              }else{                
+                // 检查缓存中是否有供应商客户信息
+                const cachedSupplierCustomer = wx.getStorageSync('supplierCustomer');
+                const customerArr = res.result.data.customerArr || [];
+                
+                let selectedSupplierId, selectedDisId, selectedCustomerDisInfo;
+                
+                if (cachedSupplierCustomer && cachedSupplierCustomer.disId && cachedSupplierCustomer.supplierId) {
+                  // 使用缓存的参数，从 customerArr 中找到对应的客户
+                  const matchedCustomer = customerArr.find(customer => 
+                    customer.nxJrdhSupplierId == cachedSupplierCustomer.supplierId &&
+                    customer.nxJrdhsNxDistributerId == cachedSupplierCustomer.disId
+                  );
+                  
+                  if (matchedCustomer) {
+                    // 找到匹配的客户，使用缓存的
+                    selectedSupplierId = matchedCustomer.nxJrdhSupplierId;
+                    selectedDisId = matchedCustomer.nxJrdhsNxDistributerId;
+                    selectedCustomerDisInfo = matchedCustomer.nxDistributerEntity;
+                  } else {
+                    // 缓存中的客户不在列表中，使用第一个默认的
+                    if (customerArr.length > 0) {
+                      selectedSupplierId = customerArr[0].nxJrdhSupplierId;
+                      selectedDisId = customerArr[0].nxJrdhsNxDistributerId;
+                      selectedCustomerDisInfo = customerArr[0].nxDistributerEntity;
+                      
+                      // 更新缓存
+                      const cachedSupplierCustomer = {
+                        disId: selectedDisId,
+                        supplierId: selectedSupplierId,
+                        userId: that.data.userId,
+                        userType: res.result.data.userType
+                      };
+                      wx.setStorageSync('supplierCustomer', cachedSupplierCustomer);
+                    }
+                  }
+                } else {
+                  // 没有缓存，使用第一个默认的
+                  if (customerArr.length > 0) {
+                    selectedSupplierId = customerArr[0].nxJrdhSupplierId;
+                    selectedDisId = customerArr[0].nxJrdhsNxDistributerId;
+                    selectedCustomerDisInfo = customerArr[0].nxDistributerEntity;
+                    
+                    // 添加缓存
+                    const cachedSupplierCustomer = {
+                      disId: selectedDisId,
+                      supplierId: selectedSupplierId,
+                      userId: that.data.userId,
+                      userType: res.result.data.userType
+                    };
+                    wx.setStorageSync('supplierCustomer', cachedSupplierCustomer);
+                  }
+                }
+                
+                this.setData({
+                  userType : res.result.data.userType,
+                  userInfo: res.result.data.userInfo,
+                  customerArr: customerArr,
+                  supplierId: selectedSupplierId,
+                  disId: selectedDisId,
+                  customerDisInfo: selectedCustomerDisInfo,
+                  disInfo: null
+                });
+                
+
+                that._initSupplierPage();
+              }
+          
+            } else { // 登录失败
+
               wx.redirectTo({
-                url: '../../inviteAdmin/inviteAdmin',
+                url: '../../inviteAdmin/inviteAdmin?disId=' + this.data.disId +
+                 '&supplierId=' + this.data.supplierId + '&userType=' + this.data.userType + '&userId='
+                  + this.data.userId,
               })
-
             }
           })
       },
@@ -237,15 +241,13 @@ Page({
   },
 
 
-  /**
-   * 获取客户订单
-   */
-  _getTodayCustomer() {
+  _supplierGetTodayCustomer() {
     var data = {
       disId: this.data.disId,
+      supplierId: this.data.supplierId
     }
     load.showLoading("获取数据中");
-    stockerGetWaitStockGoodsDeps(data).then(res => {
+    supplierGetWaitStockGoodsDeps(data).then(res => {
       load.hideLoading();
       console.log(res.result.data)
       if (res.result.code == 0) {
@@ -262,6 +264,166 @@ Page({
         
         this.getTabBar().setData({
           stockCount: res.result.data.depOrdersWait,
+          depCount: Number(res.result.data.nxDep.length)  + Number(res.result.data.gbDep.length) +  Number(res.result.data.offerArr.length),
+          
+        })
+      
+      } else {
+        wx.showToast({
+          title: res.result.msg,
+          icon: 'none'
+        })
+      }
+    })
+  },
+
+  _initSupplierPage(){
+
+     // 主动更新 tabBar 列表（确保程序刚打开时也能正确显示）
+     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      if (typeof this.getTabBar().updateTabBarList === 'function') {
+        this.getTabBar().updateTabBarList();
+      }
+    }
+
+    // 供货商获取客户订单
+    this._supplierGetTodayCustomer();
+    
+    // 检查是否有缓存的打印机设备ID，如果有则自动连接
+    this.checkAndConnectPrinter();
+    
+    // 读取缓存的标签尺寸
+    var cachedPaperSize = wx.getStorageSync('paperSize');
+    if (cachedPaperSize) {
+      this.setData({
+        paperSize: cachedPaperSize
+      });
+    }
+
+    // 设置页面尺寸
+    const app = getApp();
+    const navBarHeight = app.globalData.navBarHeight;
+    const screenHeight = app.globalData.screenHeight;
+    const screenWidth = app.globalData.screenWidth;
+    const rpxRatio = 750 / screenWidth;
+    const navBarHeightRpx = navBarHeight * rpxRatio;
+    const viewBarHeightRpx = viewBarHeight * rpxRatio;
+    const tabBarHeightRpx = 100;
+    const contentHeight = (screenHeight - navBarHeight - tabBarHeight - viewBarHeight) * rpxRatio;
+    console.log("godosoososso", globalData);
+    // 计算侧边栏高度（屏幕高度 - 导航栏 - tabBar）
+    const sidebarHeight = (screenHeight - navBarHeight - tabBarHeight) * rpxRatio;
+    
+    this.setData({
+      contentHeight: contentHeight,
+      navBarHeight: navBarHeightRpx,
+      tabBarHeight: tabBarHeightRpx,
+      viewBarHeight: viewBarHeightRpx,
+      leftMenuWidth: 150, // 左侧菜单宽度，单位 rpx
+      windowWidth: globalData.windowWidth * globalData.rpxR,
+      windowHeight: globalData.windowHeight * globalData.rpxR,
+      statusBarHeight: globalData.statusBarHeight * globalData.rpxR,
+      navBarHeight: globalData.navBarHeight * globalData.rpxR,
+      sidebarHeight: sidebarHeight, // 侧边栏高度
+      url: apiUrl.server, // 设置服务器地址，用于图片路径拼接（合并到一次 setData）
+    })
+
+  },
+
+
+  // 初始化页面逻辑
+  _initPage(userInfo, disInfo) {
+    // 设置用户信息
+    this.setData({
+      userInfo: userInfo,
+      disId: disInfo.nxDistributerId,
+      disInfo: disInfo,
+      disBusinessType: disInfo.nxDistributerBusinessTypeId 
+    })
+
+    // 立即存储 disInfo 到缓存，确保 tabBar 能获取到
+    if (disInfo) {
+      wx.setStorageSync('disInfo', disInfo);
+    }
+
+    // 主动更新 tabBar 列表（确保程序刚打开时也能正确显示）
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      if (typeof this.getTabBar().updateTabBarList === 'function') {
+        this.getTabBar().updateTabBarList();
+      }
+    }
+
+    // 获取客户订单
+    this._getTodayCustomer();
+    
+    // 检查是否有缓存的打印机设备ID，如果有则自动连接
+    this.checkAndConnectPrinter();
+    
+    // 读取缓存的标签尺寸
+    var cachedPaperSize = wx.getStorageSync('paperSize');
+    if (cachedPaperSize) {
+      this.setData({
+        paperSize: cachedPaperSize
+      });
+    }
+
+    // 设置页面尺寸
+    const app = getApp();
+    const navBarHeight = app.globalData.navBarHeight;
+    const screenHeight = app.globalData.screenHeight;
+    const screenWidth = app.globalData.screenWidth;
+    const rpxRatio = 750 / screenWidth;
+    const navBarHeightRpx = navBarHeight * rpxRatio;
+    const viewBarHeightRpx = viewBarHeight * rpxRatio;
+    const tabBarHeightRpx = 100;
+    const contentHeight = (screenHeight - navBarHeight - tabBarHeight - viewBarHeight) * rpxRatio;
+    console.log("godosoososso", globalData);
+    // 计算侧边栏高度（屏幕高度 - 导航栏 - tabBar）
+    const sidebarHeight = (screenHeight - navBarHeight - tabBarHeight) * rpxRatio;
+    
+    this.setData({
+      contentHeight: contentHeight,
+      navBarHeight: navBarHeightRpx,
+      tabBarHeight: tabBarHeightRpx,
+      viewBarHeight: viewBarHeightRpx,
+      leftMenuWidth: 150, // 左侧菜单宽度，单位 rpx
+      windowWidth: globalData.windowWidth * globalData.rpxR,
+      windowHeight: globalData.windowHeight * globalData.rpxR,
+      statusBarHeight: globalData.statusBarHeight * globalData.rpxR,
+      navBarHeight: globalData.navBarHeight * globalData.rpxR,
+      sidebarHeight: sidebarHeight, // 侧边栏高度
+      url: apiUrl.server, // 设置服务器地址，用于图片路径拼接（合并到一次 setData）
+    })
+  },
+
+
+  /**
+   * 获取客户订单
+   */
+  _getTodayCustomer() {
+    var data = {
+      disId: this.data.disId,
+    }
+    load.showLoading("获取数据中");
+    stockerGetWaitStockGoodsDeps(data).then(res => {
+      load.hideLoading();
+      console.log(res.result.data)
+      if (res.result.code == 0) {
+        this.setData({
+          nxDepArr: res.result.data.nxDep,
+          gbDepArr: res.result.data.gbDep,
+          offerArr: res.result.data.offerArr,
+        })
+        
+        // 检查是否有部门被选中
+        var hasSelectedDep = this._checkHasSelectedDep();
+        this.setData({
+          changeIds: hasSelectedDep
+        })
+        
+        this.getTabBar().setData({
+          stockCount: res.result.data.depOrdersWait,
+          depCount: Number(res.result.data.nxDep.length)  + Number(res.result.data.gbDep.length)  +  Number(res.result.data.offerArr.length),
           
         })
       
@@ -290,7 +452,7 @@ Page({
         for (var i = 0; i < nxDepArr.length; i++) {
           if (nxDepArr[i].isSelected) {
             nxIds.push(nxDepArr[i].nxDepartmentId);
-            nxDepName.push(nxDepArr[i].nxDepartmentName);
+            nxDepName.push(nxDepArr[i].nxDepartmentAttrName);
           }else{
             nxUn = Number(nxUn) + Number(1);
           }
@@ -326,25 +488,51 @@ Page({
       wx.setStorageSync('idsChangeStock', idsChangeStock);
     }
     
-    if(this.data.disInfo.nxDistributerBusinessTypeId < 2){
+    if(this.data.supplierId != -1){
       wx.navigateTo({
-        url: '../../stock/index/index',
+        url: '../catagray/catagray?supplierId='  + this.data.supplierId 
+        + '&disId=' + this.data.disId,
       })
     }else{
-      wx.navigateTo({
-        url: '../../stock/indexShelf/indexShelf',
-      })
+      if(this.data.disInfo.nxDistributerBusinessTypeId < 2 ){
+        wx.navigateTo({
+          url: '../catagray/catagray?supplierId='  + this.data.supplierId + '&disId=' + this.data.disId,
+        })
+      }else{
+        wx.navigateTo({
+          url: '../shelf/shelf',
+        })
+      }
+     
     }
    
 
   },  
+
+  toNxDisOrders(e){
+    var collNxDisId = e.currentTarget.dataset.id;
+    
+    if(this.data.disInfo.nxDistributerBusinessTypeId < 2 ){
+      wx.navigateTo({
+        url: '../catagrayColl/catagrayColl?collNxDisId='  + collNxDisId + '&disId=' + this.data.disId
+        +'&collNxDisName=' + e.currentTarget.dataset.name,
+      })
+    }else{
+      wx.navigateTo({
+        url: '../shelfColl/shelfColl?collNxDisId='+ collNxDisId + '&disId=' + this.data.disId  +'&collNxDisName=' + e.currentTarget.dataset.name,
+      })
+    }
+
+  },
+
 
   toWaitDep(e) {
     this.setData({
       changeIds: false
     })
     wx.navigateTo({
-      url: '../../../subPackage/pages/prepare/orderDepList/orderDepList?disId=' + this.data.disId ,
+      url: '../../../subPackage/pages/prepare/orderDepList/orderDepList?disId=' + this.data.disId 
+       + '&supplierId=' + this.data.supplierId,
     })
   },
 
@@ -445,6 +633,7 @@ Page({
   choiceDep(e) {
     var index = e.currentTarget.dataset.index;
     var type = e.currentTarget.dataset.type;
+    console.log("choiceDepchoiceDep", index);
     if (type == 'nx') {
       var depData = "nxDepArr[" + index + "].isSelected";
       var sel = this.data.nxDepArr[index].isSelected;
@@ -524,11 +713,74 @@ Page({
 
 
   onNavButtonTap(){
-    wx.navigateTo({
-      url: '../../disUserEdit/disUserEdit',
-    })
+    if(this.data.userType == 1){
+      wx.navigateTo({
+        url: '../../disUserEdit/disUserEdit',
+      })
+    }else{
+      // 供货商员工，显示客户列表侧边栏
+      this.setData({
+        showSideBar: true,
+      })
+    }
+  },
 
+  // 关闭侧边栏
+  closeSideBar(){
+    this.setData({
+      showSideBar: false
+    });
+  },
+
+  // 计算侧边栏高度（减去导航栏和 tabBar）
+  getSidebarHeight(){
+    const navBarHeight = this.data.navBarHeight || 88;
+    const tabBarHeight = 120; // tabBar 高度固定为 120rpx
+    const screenHeight = getApp().globalData.screenHeight;
+    const rpxRatio = 750 / getApp().globalData.screenWidth;
+    const screenHeightRpx = screenHeight * rpxRatio;
+    return screenHeightRpx - navBarHeight - tabBarHeight;
+  },
+
+  // 阻止事件冒泡（防止点击侧边栏内容时关闭）
+  stopPropagation(){
+    // 空方法，仅用于阻止事件冒泡
+  },
+
+  // 选择客户
+  selectCustomer(e){
+    const index = e.currentTarget.dataset.index;
+    const customerArr = this.data.customerArr;
     
+    if (!customerArr || index >= customerArr.length) {
+      wx.showToast({
+        title: '客户信息错误',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    const selectedCustomer = customerArr[index];
+    
+    // 更新缓存
+    const cachedSupplierCustomer = {
+      disId: selectedCustomer.nxJrdhsNxDistributerId,
+      supplierId: selectedCustomer.nxJrdhSupplierId,
+      userId: this.data.userId,
+      userType: this.data.userType
+    };
+    wx.setStorageSync('supplierCustomer', cachedSupplierCustomer);
+    
+    // 更新选中的客户信息
+    this.setData({
+      supplierId: selectedCustomer.nxJrdhSupplierId,
+      disId: selectedCustomer.nxJrdhsNxDistributerId,
+      customerDisInfo: selectedCustomer.nxDistributerEntity,
+      showSideBar: false // 隐藏侧边栏
+    });
+    
+    // 重新获取客户订单数据
+    this._supplierGetTodayCustomer();
   },
 
   // 检查并连接打印机
@@ -611,28 +863,119 @@ Page({
     console.log('BLE 信息:', app.globalData.BLEInformation);
     console.log('设备ID:', app.globalData.BLEInformation && app.globalData.BLEInformation.deviceId);
     
-    // 检查是否已连接
-    if (this.data.printOk && app.globalData.BLEInformation && app.globalData.BLEInformation.deviceId) {
-      console.log('打印机已连接，显示测试打印对话框');
-      // 已连接，执行测试打印
-      wx.showModal({
-        title: '提示',
-        content: '打印机已连接，是否测试打印？',
+    // 检查缓存中是否有打印机设置
+    var cachedDeviceInfo = wx.getStorageSync('bleDeviceInfo');
+    var cachedPaperSize = wx.getStorageSync('paperSize');
+    
+    if (cachedDeviceInfo && cachedDeviceInfo.deviceId) {
+      console.log('缓存中有打印机设置，显示操作选择');
+      // 有缓存，显示操作选择
+      wx.showActionSheet({
+        itemList: ['删除打印机和标签的设置', '测试打印机'],
         success: function(res) {
-          console.log('用户选择:', res.confirm ? '确认' : '取消');
-          if (res.confirm) {
-            console.log('用户确认，调用 testPrint');
+          console.log('用户选择了第', res.tapIndex, '个选项');
+          if (res.tapIndex === 0) {
+            // 删除打印机和标签的设置
+            console.log('用户选择删除设置');
+            wx.showModal({
+              title: '确认删除',
+              content: '确定要删除打印机和标签的设置吗？',
+              success: function(modalRes) {
+                if (modalRes.confirm) {
+                  // 先获取当前连接的设备ID（优先使用全局数据中的设备ID）
+                  var deviceIdToDisconnect = null;
+                  if (app.globalData && app.globalData.BLEInformation && app.globalData.BLEInformation.deviceId) {
+                    deviceIdToDisconnect = app.globalData.BLEInformation.deviceId;
+                  } else if (cachedDeviceInfo && cachedDeviceInfo.deviceId) {
+                    deviceIdToDisconnect = cachedDeviceInfo.deviceId;
+                  }
+                  
+                  // 如果蓝牙连接已建立，先断开连接
+                  if (deviceIdToDisconnect) {
+                    console.log('准备断开蓝牙连接，deviceId:', deviceIdToDisconnect);
+                    wx.closeBLEConnection({
+                      deviceId: deviceIdToDisconnect,
+                      success: function() {
+                        console.log('✅ 已断开蓝牙连接');
+                        // 断开连接成功后再清除缓存和重置数据
+                        that._clearPrinterSettings();
+                      },
+                      fail: function(err) {
+                        console.log('⚠️ 断开蓝牙连接失败:', err);
+                        // 即使断开失败，也清除缓存和重置数据
+                        that._clearPrinterSettings();
+                      }
+                    });
+                  } else {
+                    // 如果没有设备ID，直接清除缓存和重置数据
+                    that._clearPrinterSettings();
+                  }
+                }
+              }
+            });
+          } else if (res.tapIndex === 1) {
+            // 测试打印机
+            console.log('用户选择测试打印机');
+            // 确保全局数据已恢复
+            if (!app.globalData.BLEInformation || !app.globalData.BLEInformation.deviceId) {
+              app.globalData.BLEInformation = cachedDeviceInfo;
+            }
+            that.setData({
+              printOk: true
+            });
             that.testPrint();
           }
+        },
+        fail: function(err) {
+          console.log('用户取消选择', err);
         }
       });
     } else {
-      console.log('打印机未连接，跳转到设置页面');
-      // 未连接，跳转到连接页面
+      console.log('缓存中没有打印机设置，跳转到设置页面');
+      // 没有缓存，跳转到连接页面
       wx.navigateTo({
         url: '../../printer/printer',
       });
     }
+  },
+  
+  // 清除打印机设置（内部方法）
+  _clearPrinterSettings() {
+    var that = this;
+    var app = getApp();
+    
+    // 清除缓存
+    wx.removeStorageSync('bleDeviceInfo');
+    wx.removeStorageSync('paperSize');
+    
+    // 重置全局数据
+    if (app.globalData && app.globalData.BLEInformation) {
+      app.globalData.BLEInformation = {
+        platform: "",
+        deviceId: "",
+        deviceName: "",
+        writeCharaterId: "",
+        writeServiceId: "",
+        notifyCharaterId: "",
+        notifyServiceId: "",
+        readCharaterId: "",
+        readServiceId: "",
+        isConnected: false
+      };
+    }
+    
+    // 重置页面数据
+    that.setData({
+      printOk: false,
+      paperSize: 1
+    });
+    
+    wx.showToast({
+      title: '设置已删除',
+      icon: 'success'
+    });
+    
+    console.log('✅ 打印机和标签设置已清除');
   },
   
   // 发现并缓存可写特征

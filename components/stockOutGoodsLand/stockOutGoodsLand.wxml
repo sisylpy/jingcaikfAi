@@ -22,12 +22,8 @@
       <view class="flex-row order-row  {{focusIndex == orderIndex ? 'is-active' : ''}} p-20 border-bottom" wx:for="{{item.neetNotPurOrders}}" wx:key="nxDepartmentOrdersId" style="font-size: 5vmin; width: 100%; " wx:for-item="orders" wx:for-index="orderIndex">
         <view class="flex-column" style="width: 33%;">
             <view class="flex-row third-row">
-              <block wx:if="{{orders.nxRestrauntEntity !== null}}">
-                <view class="flex-row">
-                  <view class="m-10">{{orders.nxRestrauntEntity.nxRestrauntAttrName}}</view>
-                </view>
-              </block>
-              <block wx:elif="{{orders.gbDepartmentEntity !== null}}">
+             
+              <block wx:if="{{orders.gbDepartmentEntity !== null}}">
                 <view class="flex-row">
                   <view class="m-10">{{orders.gbDepartmentEntity.gbDepartmentName}}</view>
                 </view>

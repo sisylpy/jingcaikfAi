@@ -3,9 +3,9 @@ import apiUrl from '../../config.js'
 
 
 import {
-  updateDisUserWithFile,
-  updateDisUser,
-  disLoginKf
+  updateWeighterWithFile,
+  updateWeightUser,
+  weighterLoginKf
 } from '../../lib/apiDistributer'
 
 Page({
@@ -19,6 +19,37 @@ Page({
     imgChanged: false,
   
 
+  },
+
+  /**
+   * 客户页 order/index 每次 onShow 都会 _login 并写入 userInfo；
+   * 货架 / 未出库 tab 只在初次 onLoad/attached 读缓存，且再次进入本页时可能只触发 onShow，
+   * 故在 onShow（未编辑时）也从缓存同步一次，避免列表为空。
+   */
+  _applyUserInfoFromCache() {
+    var userInfo = wx.getStorageSync('userInfo');
+    if (!userInfo) {
+      const app = getApp();
+      if (app.globalData && app.globalData.userInfo) {
+        userInfo = app.globalData.userInfo;
+        wx.setStorageSync('userInfo', userInfo);
+      }
+    }
+    if (!userInfo) {
+      return;
+    }
+    const patch = {
+      userInfo: userInfo,
+      userName: userInfo.nxWuWxNickName,
+      phone: userInfo.nxWuWxPhone,
+      deviceId: userInfo.nxWuPrintDeviceId,
+    };
+    if (userInfo.nxWuUrlChange == 1) {
+      patch.src = apiUrl.server + userInfo.nxWuWxAvartraUrl;
+    } else {
+      patch.src = userInfo.nxWuWxAvartraUrl;
+    }
+    this.setData(patch);
   },
 
   /**
@@ -36,26 +67,13 @@ Page({
 
     })
 
-    var userInfo = wx.getStorageSync('userInfo');
-    if (userInfo) {
-      this.setData({
-        userInfo: userInfo,
-        userName: userInfo.nxDiuWxNickName,
-        phone: userInfo.nxDiuWxPhone,
-        deviceId: userInfo.nxDiuPrintDeviceId,
-      })
-      if (userInfo.nxDiuUrlChange == 1) {
-        this.setData({
-          src: apiUrl.server + userInfo.nxDiuWxAvartraUrl
-        })
-      } else {
-        this.setData({
-          src: userInfo.nxDiuWxAvartraUrl,
+    this._applyUserInfoFromCache();
+  },
 
-        })
-      }
+  onShow() {
+    if (!this.data.canSave && !this.data.imgChanged) {
+      this._applyUserInfoFromCache();
     }
-
   },
 
 
@@ -78,9 +96,9 @@ Page({
         console.log("savefileleel");
         var filePathList = _this.data.src;
         var userName = _this.data.userName;
-        var userId = _this.data.userInfo.nxDistributerUserId;
+        var userId = _this.data.userInfo.nxWeightUserId;
         load.showLoading("保存修改内容")
-        updateDisUserWithFile(filePathList, userName, userId).then(res => {
+        updateWeighterWithFile(filePathList, userName, userId).then(res => {
           if(res.result == '{"code":0}'){ 
             load.hideLoading();
             _this._login();
@@ -109,7 +127,7 @@ Page({
    * @param {*} e 
    */
   getUserName(e) {
-    if(e.detail.value !== this.data.userInfo.nxDiuWxNickName){
+    if(e.detail.value !== this.data.userInfo.nxWuWxNickName){
       this.setData({
         userName: e.detail.value,
         canSave: true,
@@ -188,10 +206,10 @@ Page({
     if (this.data.imgChanged) {
       var filePathList = this.data.src;
       var userName = this.data.userName;
-      var userId = this.data.userInfo.nxDistributerUserId;
+      var userId = this.data.userInfo.nxWeightUserId;
 
       load.showLoading("保存修改内容")
-      updateDisUserWithFile(filePathList, userName, userId).then(res => {
+      updateWeighterWithFile(filePathList, userName, userId).then(res => {
         if(res.result == '{"code":0}'){ 
           load.hideLoading();
            that._login();
@@ -205,7 +223,7 @@ Page({
     } else {
       //没有修改图片
       var userName = this.data.userName;
-      var userId = this.data.userInfo.nxDistributerUserId;
+      var userId = this.data.userInfo.nxWeightUserId;
       var data = {
         userName: userName,
         userId: userId,
@@ -213,10 +231,10 @@ Page({
         deviceId: this.data.deviceId,
       }
       load.showLoading("保存修改内容");
-      updateDisUser(data).then(res => {
+      updateWeightUser(data).then(res => {
         if (res.result.code == 0) {
         load.hideLoading();
-        
+          console.log("res",res.result.data);
         let pages = getCurrentPages();
         let prevPage = pages[pages.length - 1];
         prevPage.setData({
@@ -244,9 +262,9 @@ Page({
         console.log(res);
         if (res.code) {
           var disUser = {
-            nxDiuCode: res.code,
+            nxWuLoginCode: res.code,
           }
-          disLoginKf(disUser)
+          weighterLoginKf(disUser)
             .then(res => {
               if (res.result.code !== -1) {
                 console.log(res.result)

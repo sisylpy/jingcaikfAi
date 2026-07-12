@@ -1,6 +1,6 @@
 <view class="flex flex-column">
 
-  <custom-navbar style="height: {{navBarHeight}}rpx;" title="采购" avatar="{{url + userInfo.nxDiuWxAvartraUrl}}" button-text="设置" bindnavbuttontap="onNavButtonTap"></custom-navbar>
+  <custom-navbar style="height: {{navBarHeight}}rpx;" title="采购" avatar="{{url + userInfo.nxWuWxAvartraUrl}}" button-text="设置" bindnavbuttontap="onNavButtonTap"></custom-navbar>
 
 
   <view class="content" >
@@ -98,12 +98,6 @@
                         <text>{{orders.gbDepartmentEntity.gbDepartmentName}}</text>
                       </view>
                     </block>
-                    <block wx:if="{{orders.nxRestrauntEntity !== null}}">
-                      <view class="flex-row-wrap m-10 third-row">
-                        <text>{{orders.nxRestrauntEntity.nxRestrauntAttrName}}</text>
-                      </view>
-                    </block>
-
                     <block wx:if="{{orders.nxDepartmentEntity !== null}}">
                       <view class="flex-row-wrap m-10 third-row">
                         <text class="" wx:if="{{orders.nxDepartmentEntity.fatherDepartmentEntity !== null}}">{{orders.nxDepartmentEntity.fatherDepartmentEntity.nxDepartmentAttrName}}.</text>

@@ -14,19 +14,6 @@ Component({
       value: {}
     },
 
-
-    resetAfterSave(orders = []) {
-      if (Array.isArray(orders) && orders.length > 0) {
-        this.setData({
-          focusIndex: 0
-        });
-      } else {
-        this.setData({
-          focusIndex: -1
-        });
-      }
-    },
-
     statusBarHeight: {
       type: Number,
       value: ""
@@ -81,11 +68,32 @@ Component({
         scrollHeight = windowHeight / 2;
       }
       
-      this.setData({
+      // 如果当前 focusIndex 无效，则设置为第一条订单（索引0）
+      var currentFocusIndex = this.data.focusIndex;
+      var updateData = {
         scrollViewHeight: scrollHeight
-      });
+      };
       
-      console.log('[stockOutGoods] 订单数量:', orderCount, '滚动区域高度:', scrollHeight, 'rpx');
+      if (currentFocusIndex < 0 || currentFocusIndex >= orderCount) {
+        updateData.focusIndex = orderCount > 0 ? 0 : -1;
+      }
+      
+      this.setData(updateData);
+      
+      console.log('[stockOutGoods] 订单数量:', orderCount, '滚动区域高度:', scrollHeight, 'rpx', 'focusIndex:', updateData.focusIndex || currentFocusIndex);
+    },
+    'show': function(show) {
+      // 当弹窗打开时，如果有订单，则默认选中第一条订单（索引0）
+      if (show) {
+        var orders = this.data.item && this.data.item.nxDepartmentOrdersEntities;
+        var orderCount = orders && orders.length ? orders.length : 0;
+        if (orderCount > 0) {
+          this.setData({
+            focusIndex: 0
+          });
+          console.log('[stockOutGoods] 弹窗打开，默认选中第一条订单，focusIndex:', 0);
+        }
+      }
     }
   },
 
@@ -93,6 +101,14 @@ Component({
    * 组件的方法列表
    */
   methods: {
+
+    resetAfterSave(orders = []) {
+      if (Array.isArray(orders) && orders.length > 0) {
+        this.setData({ focusIndex: 0 });
+      } else {
+        this.setData({ focusIndex: -1 });
+      }
+    },
 
     clickMask() {
       this.setData({
@@ -114,23 +130,16 @@ Component({
 
     confirm(e) {
       var arr = (this.data.item && this.data.item.nxDepartmentOrdersEntities) ? this.data.item.nxDepartmentOrdersEntities : [];
+      
+      // 使用当前选中的订单索引（focusIndex）
       var targetIndex = this.data.focusIndex;
-
-      if (targetIndex === -1) {
-        // 如果没有聚焦，尝试找到第一条被选中且有重量的订单
-        for (var i = 0; i < arr.length; i++) {
-          if (arr[i].hasChoice) {
-            targetIndex = i;
-            break;
-          }
-        }
-      }
 
       console.log('[stockOutGoods] confirm: 总订单数=', arr.length, '当前索引=', targetIndex);
 
-      if (targetIndex === -1 || !arr[targetIndex] || !arr[targetIndex].hasChoice) {
+      // 检查是否有订单和订单是否存在
+      if (targetIndex === -1 || !arr[targetIndex]) {
         wx.showToast({
-          title: '请先选择客户订单',
+          title: '请先选择订单',
           icon: 'none'
         })
         return;
@@ -149,12 +158,11 @@ Component({
 
       this.triggerEvent('confirm', {
         item: this.data.item,
-        index: targetIndex
+        index: targetIndex,
+        order: arr[targetIndex] // 传递当前选中的订单对象
       })
 
-      this.setData({
-        focusIndex: -1
-      })
+      // 提交后保持当前选中状态，不需要重置 focusIndex
     },
 
 
@@ -190,12 +198,30 @@ getOrderWeight(e) {
     //输入非空 
     if (orderWeighValue.length > 0) {
       weightValue = orderWeighValue;
-      //1. 小数点
-      var y = String(orderWeighValue).indexOf("."); //获取小数点的位置
+      
+      // 0. 检测并修正错误格式：连续的小数点（如 "1..3" -> "1.3"）
+      // 使用正则表达式替换连续的小数点为单个小数点
+      weightValue = weightValue.replace(/\.{2,}/g, '.');
+      
+      // 检测多个小数点（如 "1.2.3"），只保留第一个小数点
+      var dotCount = (weightValue.match(/\./g) || []).length;
+      if (dotCount > 1) {
+        // 找到第一个小数点的位置
+        var firstDotIndex = weightValue.indexOf('.');
+        // 保留第一个小数点，移除后续的小数点
+        weightValue = weightValue.substring(0, firstDotIndex + 1) + weightValue.substring(firstDotIndex + 1).replace(/\./g, '');
+        wx.showToast({
+          title: '只能输入一个小数点',
+          icon: 'none'
+        });
+      }
+      
+      //1. 小数点位数判断
+      var y = String(weightValue).indexOf("."); //获取小数点的位置
       console.log(y);
       var count = 0;
       if (y !== -1) {
-        count = String(orderWeighValue).length - y - 1; //获取小数点后的个数（减1是因为包含小数点本身）
+        count = String(weightValue).length - y - 1; //获取小数点后的个数（减1是因为包含小数点本身）
       }
       if (count > 2) {
         wx.showToast({
@@ -203,35 +229,34 @@ getOrderWeight(e) {
           icon: 'none'
         })
         // 保留小数点后2位
-        var parts = orderWeighValue.split(".");
+        var parts = weightValue.split(".");
         if (parts.length === 2 && parts[1].length > 2) {
           weightValue = parts[0] + "." + parts[1].substring(0, 2);
         } else {
-          weightValue = orderWeighValue.substring(0, orderWeighValue.length - 1);
+          weightValue = weightValue.substring(0, weightValue.length - 1);
         }
       }
-    //2. 值大小判断
-    if (e.detail.value > 99999) {
-      wx.showToast({
-        title: '最大不能超过九万九千九百九十九',
-        icon: "none"
-      })
-     weightValue = Number(orderWeighValue.substring(0, orderWeighValue.length - 1));
-    }
-    
-    // 清空其他所有订单的重量，确保只有一个输入框有重量
-    var updateData = {
-      [doWeightData]: weightValue,
-    };
-    var arr = this.data.item.nxDepartmentOrdersEntities || [];
-    for (var i = 0; i < arr.length; i++) {
-      if (i !== index) {
-        var otherWeightData = "item.nxDepartmentOrdersEntities[" + i + "].nxDoWeight";
-        updateData[otherWeightData] = "";
+      
+      //2. 值大小判断
+      var numValue = parseFloat(weightValue);
+      if (!isNaN(numValue) && numValue > 99999) {
+        wx.showToast({
+          title: '最大不能超过九万九千九百九十九',
+          icon: "none"
+        })
+        // 如果超过最大值，截取到前一位
+        weightValue = weightValue.substring(0, weightValue.length - 1);
       }
-    }
+      
+      // 3. 检测无效格式：只有小数点（如 "." 或 ".."）
+      if (weightValue === '.' || weightValue === '') {
+        weightValue = '';
+      }
     
-    this.setData(updateData);
+    // 只更新当前订单的重量，不清空其他订单的重量（允许同时填写多条订单）
+    this.setData({
+      [doWeightData]: weightValue,
+    });
   } else {
     this.setData({
       [doWeightData]: "",
@@ -240,6 +265,7 @@ getOrderWeight(e) {
 },
 
     handleFocus(e) {
+      // 允许点击输入框切换选中订单
       var nextIndex = Number(e.currentTarget.dataset.index);
       var prevIndex = this.data.focusIndex;
       console.log('[stockOutGoods] handleFocus: prevIndex=', prevIndex, ', nextIndex=', nextIndex);

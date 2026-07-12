@@ -102,6 +102,16 @@ class LabelPrinter {
     
     let customerName = '';
     
+    // 协作订单：协作商名称 + nxDepartmentAttrName（优先判断）
+    const isCollaborative = order.nxDoCollaborativeNxDisId != null && order.nxDoCollaborativeNxDisId !== -1;
+    console.log(`[LabelPrinter] extractCustomerName: nxDoCollaborativeNxDisId=${order.nxDoCollaborativeNxDisId}, nxDoCollaborativeDistributerName=${order.nxDoCollaborativeDistributerName}, isCollaborative=${isCollaborative}`);
+    if (isCollaborative && order.nxDoCollaborativeDistributerName) {
+      const depName = order.nxDepartmentEntity ? (order.nxDepartmentEntity.nxDepartmentAttrName || order.nxDepartmentEntity.nxDepartmentName || '') : '';
+      customerName = order.nxDoCollaborativeDistributerName + (depName || '');
+      console.log(`[LabelPrinter] 协作订单客户名: ${customerName}`);
+      return customerName;
+    }
+    
     // 优先使用扁平化字段（stock/index 页面使用）
     if (order.fatherDepartmentAttrName) {
       // 只使用 fatherDepartmentAttrName（不拼接其他字段）
@@ -115,9 +125,6 @@ class LabelPrinter {
     } else if (order.nxDepartmentAttrName) {
       // NX部门属性名称（扁平化）
       customerName = order.nxDepartmentAttrName;
-    } else if (order.nxRestrauntAttrName) {
-      // 餐厅属性名称（扁平化）
-      customerName = order.nxRestrauntAttrName;
     }
     // 其次使用嵌套对象（兼容旧格式）
     else if (order.gbDepartmentEntity) {
@@ -145,11 +152,6 @@ class LabelPrinter {
         }
       }
     } 
-    // 最后使用 nxRestrauntEntity
-    else if (order.nxRestrauntEntity) {
-      customerName = order.nxRestrauntEntity.nxRestrauntAttrName || 
-                    order.nxRestrauntEntity.nxRestrauntName || '';
-    }
     
     return customerName || '';
   }

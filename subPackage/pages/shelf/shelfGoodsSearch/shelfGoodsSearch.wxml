@@ -1,63 +1,119 @@
-<view class="flex flex-column">
+<wxs src="../../../../utils/fn.wxs" module="tool" />
 
-  <back-navbar style="height: {{navBarHeight}}rpx;" title="搜索货架商品" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+<view class="flex flex-column height-100 width-100">
 
-  <view class="flex-column">
+  <back-navbar title="搜索货架商品" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
-    <view class="search-container">
-      <view class="search-wrapper" style="width: {{windowWidth - 40}}rpx;">
-        <view class="searchInput flex-row">
-          <input class="inputView" placeholder="{{placeHolder}}" bindconfirm="getSearchString" value="{{searchString}}" placeholder-class="holderClass" bindinput="getString" confirm-type='search' focus="{{isSearching ? 'true':''}}"></input>
-          <view class="delSearch {{searchString.length > 0 ? 'is-show' : ''}}" bindtap="delSearch" hover-class="hover">
-            <image src="/images/close.png" class="close_icon"></image>
-          </view>
+  <view class="search-container search-container--fixed" style="top: {{navBarHeight}}rpx;">
+    <view class="search-wrapper" style="width: {{windowWidth - 40}}rpx;">
+      <view class="searchInput flex-row">
+        <input class="inputView" placeholder="{{placeHolder}}" bindconfirm="getSearchString" value="{{searchString}}"
+          placeholder-class="holderClass" bindinput="getString" bindblur="onSearchInputBlur" confirm-type='search'
+          focus="{{searchInputFocus}}"></input>
+        <view class="delSearch {{searchString.length > 0 ? 'is-show' : ''}}" bindtap="delSearch" hover-class="hover">
+          <image src="/images/del.png" class="close_icon"></image>
         </view>
       </view>
     </view>
+  </view>
 
+  <!-- 文档流占位：高度 = 导航栏 + 固定搜索条，避免 margin+flex 重复留白；与 .search-container 实际高度一致 -->
+  <view class="shelf-search-flow-spacer" style="height: {{navBarHeight + searchBarOffsetRpx}}rpx;"></view>
 
-    <view class="flex-column border-bottom bg-white  font-md mt-10" wx:for="{{disSearchArr}}" wx:key="nxDepartmentDisGoodsId" wx:for-item="shelf" wx:for-index="index">
-      <view class="flex-row  p-20 border-bottom">
+  <view class="flex-column shelf-search-main">
+
+    <view class="flex-column border-bottom bg-white  font-md  p-20" wx:for="{{disSearchArr}}"
+      wx:key="nxDepartmentDisGoodsId" wx:for-item="shelf" wx:for-index="index">
+      <view class="flex-row  p-20 ">
         <text class="mr-10">货架:</text>
         <text> {{shelf.nxDistributerGoodsShelfName}}</text>
       </view>
 
-      <view class="flex-row-default  border-bottom p-10 font-lg" wx:for="{{shelf.nxDisGoodsShelfGoodsEntities}}" wx:for-item="shelfGoods" wx:for-index="shelfIndex">
+      <view class="flex-row-default  border-bottom p-10 font-lg" wx:for="{{shelf.nxDisGoodsShelfGoodsEntities}}"
+        wx:for-item="shelfGoods" wx:for-index="shelfIndex">
 
-        <view class="shelf-list-item" bindtap="showChoice" data-arr="{{shelfGoods.nxDisGoodsShelfStockEntities}}" data-goods="{{shelfGoods.nxDistributerGoodsEntity}}" data-item="{{shelf}}" data-shelfgoods="{{shelfGoods}}">
+        <view class="shelf-list-item" bindtap="showChoice" data-arr="{{shelfGoods.nxDisGoodsShelfStockEntities}}"
+          data-goods="{{shelfGoods.nxDistributerGoodsEntity}}" data-item="{{shelf}}" data-shelfgoods="{{shelfGoods}}">
           <view class="shelf-list-thumb">
-            <image wx:if="{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsFileLarge && shelfGoods.nxDistributerGoodsEntity.nxDgGoodsFileLarge !== 'null'}}" src="{{url + shelfGoods.nxDistributerGoodsEntity.nxDgGoodsFileLarge}}" mode="aspectFill" class="shelf-list-img" />
-            <image wx:elif="{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsFile && shelfGoods.nxDistributerGoodsEntity.nxDgGoodsFile !== 'null'}}" src="{{url + shelfGoods.nxDistributerGoodsEntity.nxDgGoodsFile}}" mode="aspectFill" class="shelf-list-img" />
+            <image
+              wx:if="{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsFileLarge && shelfGoods.nxDistributerGoodsEntity.nxDgGoodsFileLarge !== 'null'}}"
+              src="{{url + shelfGoods.nxDistributerGoodsEntity.nxDgGoodsFileLarge}}" mode="aspectFill"
+              class="shelf-list-img" />
+            <image
+              wx:elif="{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsFile && shelfGoods.nxDistributerGoodsEntity.nxDgGoodsFile !== 'null' && shelfGoods.nxDistributerGoodsEntity.nxDgGoodsFile !== 'goodsImage/logo.jpg' }}"
+              src="{{url + shelfGoods.nxDistributerGoodsEntity.nxDgGoodsFile}}" mode="aspectFill"
+              class="shelf-list-img" />
             <view wx:else class="shelf-list-img placeholder">
               <image src="/images/photozhaoxiang.png" mode="aspectFill" class="icon-lg" />
             </view>
           </view>
+          
           <view class="shelf-list-info">
             <view class="shelf-list-title">
-              <text class="shelf-list-brand" wx:if="{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsBrand !== 'null' && shelfGoods.nxDistributerGoodsEntity.nxDgGoodsBrand.length > 0}}">{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsBrand}}</text>
               <view class="shelf-list-title-text">
-                <text class="shelf-list-name">{{shelfIndex + 1}}.{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsName}}</text>
-                <text class="shelf-list-spec" wx:if="{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsStandardname}}">规格：{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsStandardWeight !== 'null' && shelfGoods.nxDistributerGoodsEntity.nxDgGoodsStandardWeight.length > 0 ? shelfGoods.nxDistributerGoodsEntity.nxDgGoodsStandardWeight + '/' : ''}}{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsStandardname}}</text>
+                <view class="shelf-list-title-line1">
+                  <block wx:if="{{shelfGoods.nxDgsgShelfLayer !== null}}">
+                    <text class="shelf-card-name shelf-title-prefix mainColor">L{{shelfGoods.nxDgsgShelfLayer}}</text>
+                    <text class="shelf-card-name shelf-title-prefix mainColor">-{{shelfGoods.nxDgsgShelfLayerSeq != null && shelfGoods.nxDgsgShelfLayerSeq !== '' ? shelfGoods.nxDgsgShelfLayerSeq : shelfGoods.nxDgsgSort}}</text>
+                  </block>
+                  <text class="shelf-card-brand shelf-title-brand" wx:if="{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsBrand !== 'null' && shelfGoods.nxDistributerGoodsEntity.nxDgGoodsBrand.length > 0}}">{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsBrand}}</text>
+                  <view class="shelf-title-name-wrap">
+                    <text class="shelf-card-name shelf-title-name-text">{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsName}}</text>
+                  </view>
+                </view>
+                <view class="shelf-list-line-full shelf-list-spec-carton-row" wx:if="{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsStandardname || (shelfGoods.nxDistributerGoodsEntity.nxDgItemsPerCarton !== null && shelfGoods.nxDistributerGoodsEntity.nxDgItemsPerCarton !== '')}}">
+                  <text class="shelf-card-spec shelf-list-spec-text" wx:if="{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsStandardname}}">{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsStandardWeight !== 'null' && shelfGoods.nxDistributerGoodsEntity.nxDgGoodsStandardWeight.length > 0 ? shelfGoods.nxDistributerGoodsEntity.nxDgGoodsStandardWeight + '/' : ''}}{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsStandardname}}</text>
+                  <text class="shelf-list-spec-gap" wx:if="{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsStandardname && shelfGoods.nxDistributerGoodsEntity.nxDgItemsPerCarton !== null && shelfGoods.nxDistributerGoodsEntity.nxDgItemsPerCarton !== ''}}"> </text>
+                  <view class="flex-row shelf-card-spec shelf-list-carton-inline" wx:if="{{shelfGoods.nxDistributerGoodsEntity.nxDgItemsPerCarton !== null && shelfGoods.nxDistributerGoodsEntity.nxDgItemsPerCarton !== ''}}">
+                    <text class="shelf-list-carton-main">{{shelfGoods.nxDistributerGoodsEntity.nxDgItemsPerCarton}}{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsStandardname}}</text>
+                    <text class="shelf-list-carton-unit">/{{shelfGoods.nxDistributerGoodsEntity.nxDgCartonUnit}}</text>
+                  </view>
+                </view>
+                <view class="shelf-list-line-full" wx:if="{{shelfGoods.nxDistributerGoodsEntity.nxDgNxGoodsId == null}}">
+                  <text class="text-danger font-xs">[临时]</text>
+                </view>
               </view>
             </view>
+
             <view class="shelf-list-stock">
               <text class="shelf-list-stock-label">位置：</text>
-              <view class="shelf-card-stock mainColor font-bold">第{{shelfGoods.nxDgsgSort}}个</view>
+              <view class="shelf-search-location-body mainColor font-bold">
+                <text class="shelf-search-location-shelf mr-10">{{shelf.nxDistributerGoodsShelfName}}</text>
+                <block wx:if="{{shelfGoods.nxDgsgShelfLayer !== null}}">
+                  <text class="shelf-search-location-sep"> L{{shelfGoods.nxDgsgShelfLayer}}-{{shelfGoods.nxDgsgShelfLayerSeq != null && shelfGoods.nxDgsgShelfLayerSeq !== '' ? shelfGoods.nxDgsgShelfLayerSeq : shelfGoods.nxDgsgSort}}</text>
+                </block>
+              </view>
             </view>
             <view class="shelf-list-stock">
               <text class="shelf-list-stock-label">库存：</text>
               <view class="shelf-card-stock">
-                <block wx:if="{{shelfGoods.nxDisGoodsShelfStockEntities !== null && shelfGoods.nxDisGoodsShelfStockEntities.length > 0}}">
-                  <text class="stock-chip" wx:for="{{shelfGoods.nxDisGoodsShelfStockEntities}}" wx:for-item="stock" wx:key="index">{{stock.nxDgssRestWeight}}{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsStandardname}}</text>
+                <block
+                  wx:if="{{shelfGoods.nxDisGoodsShelfStockEntities !== null && shelfGoods.nxDisGoodsShelfStockEntities.length > 0}}">
+                  <block wx:for="{{shelfGoods.nxDisGoodsShelfStockEntities}}" wx:for-item="stock" wx:key="index">
+                    <text class="stock-chip" wx:if="{{shelfGoods.nxDistributerGoodsEntity.nxDgCartonUnit && shelfGoods.nxDistributerGoodsEntity.nxDgCartonUnit !== '' && shelfGoods.nxDistributerGoodsEntity.nxDgCartonUnit !== 'null' && shelfGoods.nxDistributerGoodsEntity.nxDgItemsPerCarton > 0}}">{{tool.formatQuantityDisplay(stock.nxDgssRestWeight, shelfGoods.nxDistributerGoodsEntity.nxDgCartonUnit, shelfGoods.nxDistributerGoodsEntity.nxDgItemsPerCarton, shelfGoods.nxDistributerGoodsEntity.nxDgGoodsStandardname)}}</text>
+                    <text class="stock-chip" wx:else>{{stock.nxDgssRestWeight}}{{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsStandardname}}</text>
+                  </block>
                 </block>
                 <block wx:else>
-                  <text class="shelf-card-empty">暂无库存</text>
+                  <text class="stock-empty">暂无库存</text>
                 </block>
+              </view>
+            </view>
+            <view class="shelf-same-goods-row shelf-list-same-goods" wx:if="{{shelfGoods.sameShelfGoods && shelfGoods.sameShelfGoods.length > 0}}">
+              <text class="shelf-list-stock-label">同架：</text>
+              <view class="flex-row-wrap shelf-same-goods-chips">
+                <view class="sameShelf mr-10" wx:for="{{shelfGoods.sameShelfGoods}}" wx:for-item="same" wx:for-index="sameIdx" wx:key="sameIdx">
+                  <text>{{same.shelfName}}</text>
+                  <block wx:if="{{same.nxDgsgShelfLayer !== null}}">
+                    <text>-L{{same.nxDgsgShelfLayer}}</text>
+                  </block>
+                  <text>-{{same.nxDgsgShelfLayerSeq != null && same.nxDgsgShelfLayerSeq !== '' ? same.nxDgsgShelfLayerSeq : same.nxDgsgSort}}</text>
+                </view>
               </view>
             </view>
           </view>
           <view class="shelf-list-tag" wx:if="{{shelfGoods.shelfPurGoods !== null}}">
-            <view class="circle_list {{shelfGoods.shelfPurGoods.nxDpgStatus > 1 ? 'gray' :''}} center-content">
+            <view class="circle_list {{shelfGoods.shelfPurGoods.nxDpgStatus == 1 ? 'gray' : shelfGoods.shelfPurGoods.nxDpgStatus == 2 ? 'green' : ''}} center-content">
               <view class="flex-row">
                 <text>{{shelfGoods.shelfPurGoods.nxDpgQuantity}}</text>
                 <text>{{shelfGoods.shelfPurGoods.nxDpgStandard}}</text>
@@ -70,12 +126,14 @@
     </view>
 
     <view class="shelf-list-wrap" wx:if="{{unShelfGoodsList.length  > 0}}">
-      <view class="bg-light p-20 text-secondary">非货架商品</view><view class="bg-light p-20 text-secondary">非货架商品</view>
+      <view class="bg-light p-20 text-secondary">非货架商品</view>
       <block wx:for="{{unShelfGoodsList}}" wx:for-item="disGoods" wx:key="nxDistributerGoodsId">
         <view class="shelf-list-item" bindtap="showChoiceUn" data-goods="{{disGoods}}">
           <view class="shelf-list-thumb">
-            <image wx:if="{{disGoods.nxDgGoodsFileLarge && disGoods.nxDgGoodsFileLarge !== 'null'}}" src="{{url + disGoods.nxDgGoodsFileLarge}}" mode="aspectFill" class="shelf-list-img" />
-            <image wx:elif="{{disGoods.nxDgGoodsFile && disGoods.nxDgGoodsFile !== 'null'}}" src="{{url + disGoods.nxDgGoodsFile}}" mode="aspectFill" class="shelf-list-img" />
+            <image wx:if="{{disGoods.nxDgGoodsFileLarge && disGoods.nxDgGoodsFileLarge !== 'null'}}"
+              src="{{url + disGoods.nxDgGoodsFileLarge}}" mode="aspectFill" class="shelf-list-img" />
+            <image wx:elif="{{disGoods.nxDgGoodsFile && disGoods.nxDgGoodsFile !== 'null'  && disGoods.nxDgGoodsFile !== 'goodsImage/logo.jpg'}}"
+              src="{{url + disGoods.nxDgGoodsFile}}" mode="aspectFill" class="shelf-list-img" />
             <view wx:else class="shelf-list-img placeholder">
               <image src="/images/photozhaoxiang.png" mode="aspectFill" class="icon-lg" />
             </view>
@@ -84,17 +142,24 @@
           <view class="shelf-list-info">
 
             <view class="shelf-list-title">
-              <text class="shelf-list-brand" wx:if="{{disGoods.nxDgGoodsBrand !== 'null' && disGoods.nxDgGoodsBrand && disGoods.nxDgGoodsBrand.length > 0}}">{{disGoods.nxDgGoodsBrand}}</text>
               <view class="shelf-list-title-text">
+                <text class="shelf-list-brand"
+                  wx:if="{{disGoods.nxDgGoodsBrand !== 'null' && disGoods.nxDgGoodsBrand && disGoods.nxDgGoodsBrand.length > 0}}">{{disGoods.nxDgGoodsBrand}}</text>
                 <text class="shelf-list-name">{{disGoods.nxDgGoodsName}}</text>
-                <text class="shelf-list-spec" wx:if="{{disGoods.nxDgGoodsStandardname}}">规格：{{disGoods.nxDgGoodsStandardWeight !== 'null' && disGoods.nxDgGoodsStandardWeight && disGoods.nxDgGoodsStandardWeight.length > 0 ? disGoods.nxDgGoodsStandardWeight + '/' : ''}}{{disGoods.nxDgGoodsStandardname}}</text>
+                <text class="shelf-list-spec"
+                  wx:if="{{disGoods.nxDgGoodsStandardname}}">规格：{{disGoods.nxDgGoodsStandardWeight !== 'null' &&
+                  disGoods.nxDgGoodsStandardWeight && disGoods.nxDgGoodsStandardWeight.length > 0 ?
+                  disGoods.nxDgGoodsStandardWeight + '/' : ''}}{{disGoods.nxDgGoodsStandardname}}</text>
               </view>
             </view>
             <view class="shelf-list-stock">
               <text class="shelf-list-stock-label">库存：</text>
               <view class="shelf-card-stock">
                 <block wx:if="{{disGoods.stockList && disGoods.stockList.length > 0}}">
-                  <text class="stock-chip" wx:for="{{disGoods.stockList}}" wx:for-item="stock" wx:key="index">{{stock.nxDgssRestWeight}}{{disGoods.nxDgGoodsStandardname}}</text>
+                  <block wx:for="{{disGoods.stockList}}" wx:for-item="stock" wx:key="index">
+                    <text class="stock-chip" wx:if="{{disGoods.nxDgCartonUnit && disGoods.nxDgCartonUnit !== '' && disGoods.nxDgCartonUnit !== 'null' && disGoods.nxDgItemsPerCarton > 0}}">{{tool.formatQuantityDisplay(stock.nxDgssRestWeight, disGoods.nxDgCartonUnit, disGoods.nxDgItemsPerCarton, disGoods.nxDgGoodsStandardname)}}</text>
+                    <text class="stock-chip" wx:else>{{stock.nxDgssRestWeight}}{{disGoods.nxDgGoodsStandardname}}</text>
+                  </block>
                 </block>
                 <block wx:else>
                   <text class="stock-empty">暂无库存</text>
@@ -105,9 +170,10 @@
         </view>
       </block>
     </view>
-    
+
 
   </view>
+
 </view>
 
 <!-- 弹窗组件 -->
@@ -177,7 +243,7 @@
           <text>({{shelfGoods.nxDistributerGoodsEntity.nxDgGoodsStandardname}})</text>
         </view>
       </view>
-      <block wx:if="{{shelfGoods.shelfPurGoods  == null}}">
+      <!-- <block wx:if="{{shelfGoods.shelfPurGoods  == null}}">
 
         <view class="p-30 flex-row border-bottom" catchtap="toOpenDisPlanPurchase" hover-class="hover">
           <image src="/images/add-active.png" mode="aspectFill" class="icon mr-20" />
@@ -191,12 +257,12 @@
           <image src="/images/icon_goods.png" mode="aspectFill" class="icon mr-20" />
           <text> 修改订货</text>
         </view>
-      </block>
+      </block> -->
 
-      <view class="p-30 flex-row border-bottom" catchtap="toOpenInputPurSock" hover-class="hover">
+      <!-- <view class="p-30 flex-row border-bottom" catchtap="toOpenInputPurSock" hover-class="hover">
         <image src="/images/gouwuche-4.png" mode="aspectFill" class="icon mr-20" />
         <text>采购入库</text>
-      </view>
+      </view> -->
 
       <block wx:if="{{shelfGoods.nxDisGoodsShelfStockEntities.length > 0}}">
 
@@ -223,14 +289,14 @@
         <text> 修改到其它货架</text>
       </view>
 
-      <view class="p-30 flex-row border-bottom" catchtap="setShelfLayer" hover-class="hover" wx:if="{{!(shelfGoods.nxDgsgShelfLayer > 0)}}">
+      <!-- <view class="p-30 flex-row border-bottom" catchtap="setShelfLayer" hover-class="hover" wx:if="{{!(shelfGoods.nxDgsgShelfLayer > 0)}}">
         <image src="/images/add-bold-2.png" mode="aspectFill" class="icon mr-20" />
         <text> 设置层架 </text>
       </view>
       <view class="p-30 flex-row border-bottom" catchtap="clearShelfLayer" hover-class="hover" wx:else>
         <image src="/images/del.png" mode="aspectFill" class="icon mr-20" />
         <text> 取消层架 </text>
-      </view>
+      </view> -->
 
       <view class="p-30 flex-row border-bottom" catchtap="toAddShelfGoodsSort" data-type="before" hover-class="hover">
         <image src="/images/add-bold-2.png" mode="aspectFill" class="icon mr-20" />

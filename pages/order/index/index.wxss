@@ -1,18 +1,17 @@
 
-.page-root {
+.page {
   height: 100vh;
-  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background-color: #f5f5f5;
-  display: flex;
-  flex-direction: column;
 }
-.content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+
+.header {
+  flex: 0 0 auto;
 }
-.scroll-content {
-  flex: 1;
+
+.list {
+  flex: 1 1 auto;
   min-height: 0;
 }
 
@@ -75,4 +74,127 @@
 .button-container .icon {
   width: 40rpx;
   height: 40rpx;
+}
+
+/* 侧边栏样式 */
+.sidebar-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.sidebar-content {
+  width: 600rpx;
+  max-width: 80%;
+  height: 100%;
+  background-color: #fff;
+  box-shadow: 2rpx 0 10rpx rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  animation: slideInLeft 0.3s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.sidebar-header {
+  height: 100rpx;
+  padding: 0 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1rpx solid #e5e5e5;
+  background-color: #f8f8f8;
+}
+
+.sidebar-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.sidebar-close {
+  font-size: 50rpx;
+  color: #999;
+  line-height: 1;
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-close:active {
+  color: #333;
+}
+
+.sidebar-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.sidebar-item {
+  padding: 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #fff;
+  transition: background-color 0.2s;
+}
+
+.sidebar-item:active {
+  background-color: #f5f5f5;
+}
+
+.sidebar-item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-item-name {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: 500;
+  margin-bottom: 10rpx;
+}
+
+.sidebar-item-desc {
+  font-size: 26rpx;
+  color: #999;
+}
+
+.sidebar-item-check {
+  width: 50rpx;
+  height: 50rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.check-icon {
+  font-size: 36rpx;
+  color: #02b360;
+  font-weight: bold;
+}
+
+.sidebar-empty {
+  padding: 100rpx 30rpx;
+  text-align: center;
+  color: #999;
+  font-size: 28rpx;
 }

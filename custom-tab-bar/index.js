@@ -56,15 +56,15 @@ Component({
           "selectedIconPath": "/images/icons/icon_stock_active.png"
         },
         {
-          "pagePath": "pages/stock/goods/goods",
-          "text": "未出库",
+          "pagePath": "pages/total/goods/goods",
+          "text": "批量出库",
           "iconPath": "/images/icons/icon_purchase.png",
           "selectedIconPath": "/images/icons/icon_purchase_active.png"
         }
       ];
       
-      // 如果 disBusinessType > 1，添加货架页面
-      if (disBusinessType !== null && disBusinessType !== undefined && disBusinessType > 1) {
+      // 如果 disBusinessType > 2(专业货架批发商)，添加货架页面
+      if (disBusinessType !== null && disBusinessType !== undefined && disBusinessType  > 2) {
         baseList.push({
           "pagePath": "pages/shelf/index/index",
           "text": "货架",
@@ -80,16 +80,7 @@ Component({
       console.log('Tab bar 列表已更新，disBusinessType:', disBusinessType, '列表数量:', baseList.length);
     },
     switchTab(e) {
-      wx.removeStorageSync('toDetail');
-      wx.removeStorageSync('sons');
-      wx.removeStorageSync('depFatherId');
-      wx.removeStorageSync('greatGrandFatherId');
-      wx.removeStorageSync('grandFatherId');
-      wx.removeStorageSync('disGoods');
-      wx.removeStorageSync('fatherGoods');
-      wx.removeStorageSync('weightItem');
-      wx.removeStorageSync('showType');
-      wx.removeStorageSync('toOrderWx');
+     
       
       const data = e.currentTarget.dataset;
       const url = '/' + data.path;

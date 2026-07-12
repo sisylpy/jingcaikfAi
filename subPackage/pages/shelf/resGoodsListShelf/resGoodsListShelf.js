@@ -70,10 +70,16 @@ Page({
     var value = wx.getStorageSync('userInfo');
     if (value) {
       this.setData({
-        disId: value.nxDistributerEntity.nxDistributerId,
         userInfo: value
       })
     }
+    var disValue = wx.getStorageSync('disInfo');
+        if (disValue) {
+          this.setData({
+            disInfo: disValue,
+            disId: disValue.nxDistributerId,
+          })
+        }
 
     // 搜索栏实际高度计算：
     // padding: 16rpx 24rpx 28rpx (上、左右、下)
@@ -474,7 +480,7 @@ Page({
       });
       return;
     }
-    
+    // subPackage/pages/shelf/resGoodsListShelf/resGoodsListShelf
     wx.navigateTo({
       url: `../../goods/disAddGoodsLinshi/disAddGoodsLinshi?from=shelf&goodsName=${this.data.searchStr}&shelfId=${this.data.shelfId}&sort=${this.data.sort}&shelfSort=${this.data.shelfSort || 0}`
     });

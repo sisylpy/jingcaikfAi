@@ -1,25 +1,53 @@
 <view class="flex flex-column font-xl">
-  <back-navbar style="height: {{navBarHeight}}rpx;" title="出库客户" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="出库客户" avatar="/images/back-gray.png" button-text="设置"
+    bindnavbuttontap="toBack"></back-navbar>
 
   <view class="flex-column mt-10">
 
-    <view class="bg-white p-20 flex-row-between border-bottom " bindtap="toCarDep" data-id="{{item.nxDepartmentId}}" data-type="nx" hover-class="hover" data-name="{{item.nxDepartmentName}}" wx:for="{{nxDepArr}}">
+    <!-- empty -->
 
-      <view class="flex-column p-20" >
+    <view class="emptyView {{nxDepArr.length == 0  && gbDepArr.length == 0 && offerArr.length == 0? 'is-active' : ''}}"
+      style="height: {{windowHeight - 360}}rpx; text-align:center;">
+      <view class="font-lg empty_view ">
+        <view class="flex-column-center">
+          <image class="empty_image" src="/images/cart-Empty.png"></image>
+          <text class="big">暂时无出库客户</text>
+        </view>
+      </view>
+    </view>
+    <!-- ./empty -->
+    <view class="bg-white p-20 flex-row-between border-bottom " bindtap="toCarDep" data-id="{{item.nxDepartmentId}}"
+      data-type="nx" hover-class="hover" data-name="{{item.nxDepartmentName}}" wx:for="{{nxDepArr}}"
+      wx:key="nxDepartmentId">
+
+      <view class="flex-column">
         <view class="flex-row">
-          <!-- <text class="font-lg font-bold mainColor" wx:if="{{item.nxDepartmentPickName !== null}}">{{item.nxDepartmentPickName}}-</text> -->
+          <text>{{index + 1}}.</text>
           <text class="font-lg-2 font-bold">{{item.nxDepartmentName}}</text>
         </view>
-        
-
-        
       </view>
 
       <view>
-      <image src="../../../../images/arrow-right-3.png" mode="aspectFill" class="icon"/>
+        <image src="../../../../images/arrow-right-3.png" mode="aspectFill" class="icon" />
       </view>
+    </view>
 
-      
+
+    <view class="flex-row-between p-20 border-bottom bg-white" wx:for="{{offerArr}}" wx:key="nxDistributerId" bind:tap="toNxDisOrders" data-id="{{item.nxDistributerId}}" >
+     
+     <view class="flex-column">
+          <view class="flex-row" style="width: {{windowWidth - 120}}rpx; ">
+            <text class="mr-20">协作伙伴:</text>
+            <text class="font-lg">{{item.nxDistributerShowName}}</text>
+          </view>
+         
+        </view>
+
+        <view class="flex-row with-mr-20">
+         
+            <image src="/images/arrow-right-3.png" class="icon"></image>
+          
+        </view>
     </view>
 
 
@@ -28,39 +56,43 @@
       <text class="p-20">gb客户:</text>
 
       <view class="bg-white p-20 flex-row-default border-bottom" wx:for="{{gbDepArr}}">
-       
-       <text class="mr-20">{{index + 1}}.</text>
 
-       <view class="flex-column" bindtap="toCarDep" data-id="{{item.gbDepartmentId}}" data-type="gb" hover-class="hover" data-name="{{item.gbDepartmentName}}" style="width: {{windowWidth - 220}}rpx; ">
-        
-       <view class="flex-row">
-         <text class="font-lg font-bold">{{item.gbDepartmentName}}</text>
-       </view>
+        <text class="mr-20">{{index + 1}}.</text>
 
-       <view class="flex-row font-md" style="width: {{windowWidth - 80}}rpx;">
-         <view class="flex-row third-row">
-           <text class="m-10 text-secondary">订单:</text>
-           <text class="five-weight">{{item.gbDepartmentAddCount}}个</text>
-         </view>
+        <view class="flex-column" bindtap="toCarDep" data-id="{{item.gbDepartmentId}}" data-type="gb"
+          hover-class="hover" data-name="{{item.gbDepartmentName}}" style="width: {{windowWidth - 220}}rpx; ">
 
-         <view class="flex-row third-row">
-           <text class="m-10 text-secondary">未拣货:</text>
-           <text class="five-weight {{item.gbDepartmentPurOrderCount > 0 ? 'mainColor' : ''}}">{{item.gbDepartmentPurOrderCount}}个</text>
-         </view>
-       </view>
-        
-       </view>
+          <view class="flex-row">
+            <text class="font-lg font-bold">{{item.gbDepartmentName}}</text>
+          </view>
+
+          <view class="flex-row font-md" style="width: {{windowWidth - 80}}rpx;">
+            <view class="flex-row third-row">
+              <text class="m-10 text-secondary">订单:</text>
+              <text class="five-weight">{{item.gbDepartmentAddCount}}个</text>
+            </view>
+
+            <view class="flex-row third-row">
+              <text class="m-10 text-secondary">未拣货:</text>
+              <text
+                class="five-weight {{item.gbDepartmentPurOrderCount > 0 ? 'mainColor' : ''}}">{{item.gbDepartmentPurOrderCount}}个</text>
+            </view>
+          </view>
+
+        </view>
 
 
 
 
-       <view class="p-20 flex-column-center" bindtap="choiceDep" data-type="gb" data-index="{{index}}" hover-class="hover" style="width: 200rpx;" wx:if="{{item.gbDepartmentPurOrderCount > 0}}">
-         <image src="{{item.isSelected ? '/images/selected.png' : '/images/radiobuttonunselect-2.png'}}" mode="aspectFill" class="icon" />
-         
+        <view class="p-20 flex-column-center" bindtap="choiceDep" data-type="gb" data-index="{{index}}"
+          hover-class="hover" style="width: 200rpx;" wx:if="{{item.gbDepartmentPurOrderCount > 0}}">
+          <image src="{{item.isSelected ? '/images/selected.png' : '/images/radiobuttonunselect-2.png'}}"
+            mode="aspectFill" class="icon" />
 
-       </view>
 
-     </view>
+        </view>
+
+      </view>
 
     </view>
 

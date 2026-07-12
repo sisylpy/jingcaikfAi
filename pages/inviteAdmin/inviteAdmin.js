@@ -5,9 +5,9 @@ const app = getApp();
 
 import {
   disUserSave,
-  disKfUserSaveWithFile,
+  weighterKfUserSaveWithFile,
   disUserSaveWithFileWork,
-  disLoginKf,
+  weighterLoginKf,
   disLoginWork
 } from '../../lib/apiDistributer'
 
@@ -21,26 +21,21 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
+    const userType = options.userType ; // 2=供货商员工，1=配送商员工
+    const buttonText = userType === 2 ? '注册供货商拣货人员' : '注册配送商拣货人员';
+    
     this.setData({
       windowWidth: globalData.windowWidth * globalData.rpxR,
       windowHeight: globalData.windowHeight * globalData.rpxR,
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
       nickName: "",
+      userId: options.userId,
       disId: options.disId,
+      userId: options.userId,
+      userType: userType,
+      buttonText: buttonText,
+      supplierId: options.supplierId
     })
-
-    if (options.q) {
-      //获取二维码的携带的链接信息
-      let qrUrl = decodeURIComponent(options.q)
-      var that = this;
-      that.setData({
-        //获取链接中的参数信息
-        disId: utils.getQueryString(qrUrl, 'disId'),
-        disName: utils.getQueryString(qrUrl, 'disName'),
-        admin: utils.getQueryString(qrUrl, 'admin'),
-      })
-    }
-
     this._aaa();
   },
 
@@ -49,12 +44,11 @@ Page({
    * @param {*} options 
    */
   onShareAppMessage: function (options) {
-    const disId = this.data.disId;
-    const disName = this.data.disName || '配送商';
     
     return {
       title: `邀请您加入${disName}的拣货团队`, 
-      path: '/pages/inviteAdmin/inviteAdmin?disId=' + disId + '&disName=' + encodeURIComponent(disName) + '&admin=0',
+      path: '/pages/inviteAdmin/inviteAdmin?userId=' + this.data.userId + '&supplierId=' + this.data.supplierId  + '&disId=' + this.data.disId + '&userType=' + this.data.userType
+      ,
       imageUrl: '',
     }
   },
@@ -105,22 +99,69 @@ Page({
     var filePathList = src;
     var userName = this.data.nickName;
     var disId = this.data.disId;
+    var userId = this.data.userId;
     var code = this.data.code;
+    
+    var userType = this.data.userType;
+    
    
-    disKfUserSaveWithFile(filePathList, userName, code, disId).then((res) => {
+    
+    load.showLoading("注册中...");
+   console.log(filePathList, userName, code, userType, disId, userId);
+    weighterKfUserSaveWithFile(filePathList, userName, code, userType, disId, userId).then((res) => {
       console.log(res);
-      if (res.result == '{"code":0}') {
-        that._login();
-
-      } else {
-        load.hideLoading();
-        wx.showToast({
-          title: "请直接登陆",
-          icon: 'none'
-        })
+      load.hideLoading();
+      
+      // 处理返回结果（可能是字符串或对象）
+      var resultCode = -1;
+      if (typeof res.result === 'string') {
+        try {
+          var parsed = JSON.parse(res.result);
+          resultCode = parsed.code;
+        } catch (e) {
+          // 如果解析失败，检查是否包含 code:0
+          if (res.result.indexOf('"code":0') !== -1 || res.result == '{"code":0}') {
+            resultCode = 0;
+          }
+        }
+      } else if (res.result && res.result.code !== undefined) {
+        resultCode = res.result.code;
       }
-
-    })
+      
+      if (resultCode === 0) {
+        // 注册成功，直接跳转到订单页面
+        wx.switchTab({
+          url: '/pages/order/index/index'
+        });
+      } else {
+        // 注册失败
+        var errorMsg = '注册失败';
+        if (res.result && res.result.msg) {
+          errorMsg = res.result.msg;
+        } else if (typeof res.result === 'string') {
+          try {
+            var parsed = JSON.parse(res.result);
+            errorMsg = parsed.msg || '注册失败';
+          } catch (e) {
+            errorMsg = res.result;
+          }
+        }
+        
+        wx.showModal({
+          title: '提示',
+          content: errorMsg,
+          showCancel: false,
+          confirmText: '知道了'
+        });
+      }
+    }).catch((err) => {
+      load.hideLoading();
+      console.error('注册失败:', err);
+      wx.showToast({
+        title: '注册失败，请重试',
+        icon: 'none'
+      });
+    });
 
 
   },
@@ -148,9 +189,9 @@ Page({
         load.hideLoading();
 
         var disUser = {
-          nxDiuCode: res.code,
+          nxWuLoginCode: res.code,
         }
-        disLoginKf(disUser)
+        weighterLoginKf(disUser)
           .then((res) => {
             console.log(res);
             if (res.result.code !== -1) { //登陆成功
@@ -195,7 +236,7 @@ Page({
         if (resQy.code) {
           load.hideLoading();
           var disUser = {
-            nxDiuCode: resQy.code,
+            nxWuLoginCode: resQy.code,
           }
           disLoginWork(disUser)
             .then((res) => {
@@ -320,7 +361,7 @@ Page({
               nxDiuWxNickName: resUser.userInfo.nickName,
               nxDiuWxAvartraUrl: resUser.userInfo.avatarUrl,
               nxDiuWxPhone: 111111,
-              nxDiuCode: res.code,
+              nxWuLoginCode: res.code,
               nxDiuAdmin: 0,
               nxDiuDistributerId: disId
 

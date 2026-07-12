@@ -66,12 +66,12 @@ Component({
       if (value) {
         this.setData({
           userInfo: value,
-          disId: value.nxDistributerEntity.nxDistributerId,
         })
         var disValue = wx.getStorageSync('disInfo');
         if (disValue) {
           this.setData({
             disInfo: disValue,
+            disId: disValue.nxDistributerId,
           })
         }
       }
@@ -476,7 +476,7 @@ Component({
 
 
     toEditHome() {
-      if(this.data.userInfo.nxDiuAdmin == 0){
+      if(this.data.userInfo.nxWuAdmin == 0){
         wx.navigateTo({
           url: '../../../subPackage/pages/mangement/homePage/homePage',
         })

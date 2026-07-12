@@ -40,19 +40,22 @@ Page({
   },
 
   onLoad: function (options) {
-    // 动态计算高度，避免硬编码导致的不稳定
-    const navBarHeightRpx = globalData.navBarHeight * globalData.rpxR;
-    const windowHeightRpx = globalData.windowHeight * globalData.rpxR;
-    const navbarHeightRpx = 80; // navbar (tabs) 的高度，从 wxss 中获取
-    // 计算 swiper 和 scroll-view 的高度：屏幕高度 - 导航栏高度 - tabs 高度
-    const swiperHeight = windowHeightRpx - navBarHeightRpx - navbarHeightRpx;
+    // 使用 getWindowInfo 获取实时尺寸，解决 iPhone 真机高度计算不准的问题
+    const windowInfo = wx.getWindowInfo();
+    const winHeight = windowInfo.windowHeight;
+    const winWidth = windowInfo.windowWidth;
+    const rpxR = 750 / winWidth;
+    const navBarHeightPx = globalData.navBarHeight;
+    const navbarHeightPx = 120 * (winWidth / 750); // navbar(80rpx) + p-20(40rpx) 转 px
+    // swiper 高度用 px，真机更稳定（rpx 在 iPhone 上可能有转换偏差）
+    const swiperHeightPx = Math.max(200, Math.floor(winHeight - navBarHeightPx - navbarHeightPx));
     
     this.setData({
-      windowWidth: globalData.windowWidth * globalData.rpxR,
-      windowHeight: windowHeightRpx,
-      navBarHeight: navBarHeightRpx,
-      navbarHeight: navbarHeightRpx, // tabs 高度
-      swiperHeight: swiperHeight, // 动态计算的 swiper 高度
+      windowWidth: winWidth * rpxR,
+      windowHeight: winHeight * rpxR,
+      navBarHeight: navBarHeightPx * rpxR,
+      navbarHeight: 120,
+      swiperHeight: swiperHeightPx, // 用 px，swiper 在 iPhone 真机更准确
       depFatherId: options.depFatherId,
       gbDepFatherId: options.gbDepFatherId,
       resFatherId: options.resFatherId,
@@ -60,7 +63,8 @@ Page({
       gbDisId: options.gbDisId,
       comId: options.comId,
       depHasSubs: options.depHasSubs,
-      depName: options.depName
+      depName: options.depName,
+      supplierId: options.supplierId
     })
     
     var value = wx.getStorageSync('userInfo');
@@ -68,10 +72,17 @@ Page({
     if (value) {
       this.setData({
         userInfo: value,
-        disId: value.nxDistributerEntity.nxDistributerId,
 
       })
     }
+
+    var disValue = wx.getStorageSync('disInfo');
+        if (disValue) {
+          this.setData({
+            disInfo: disValue,
+            disId: disValue.nxDistributerId,
+          })
+        }
 
     this.clueOffset();
     this._initDataNot();
@@ -83,6 +94,7 @@ Page({
       depFatherId: this.data.depFatherId,
       gbDepFatherId: this.data.gbDepFatherId,
       resFatherId: this.data.resFatherId,
+      supplierId: this.data.supplierId,
     }
     load.showLoading("获取订单中")
     stockerGetHaveOutCataGoods(data)
@@ -114,9 +126,9 @@ Page({
       depFatherId: this.data.depFatherId,
       gbDepFatherId: this.data.gbDepFatherId,
       resFatherId: this.data.resFatherId,
-      
+      supplierId: this.data.supplierId,
     }
-    load.showLoading("获取订单中1")
+    load.showLoading("获取订单中")
     stokerHaveNotOutCataGoods(data)
       .then(res => {
         if (res.result.code == 0) {

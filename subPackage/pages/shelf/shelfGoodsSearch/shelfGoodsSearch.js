@@ -46,6 +46,11 @@ Page({
     shelfItem: null,
     userId: null,
     userInfo: null,
+      /** 返回货架首页时是否触发刷新（仅在有变更时置 true） */
+      needNotifyParentRefresh: false,
+      update: false,
+      /** 与 .search-container 一致：30 + 88 + 30（rpx），.searchInput 已 box-sizing:border-box */
+      searchBarOffsetRpx: 148,
   },
 
 
@@ -53,21 +58,45 @@ Page({
     const app = getApp();
     const globalData = app.globalData;
 
+    const searchName = options.searchName ? decodeURIComponent(options.searchName) : '';
+
     this.setData({
       windowWidth: globalData.windowWidth * globalData.rpxR,
       windowHeight: globalData.windowHeight * globalData.rpxR,
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
       url: apiUrl.server,
       disId: options.disId,
-    })
+      searchString: searchName,
+      needNotifyParentRefresh: false,
+      update: false,
+    }, () => {
+      if (searchName && searchName.length > 0) {
+        this.getSearchString();
+      }
+    });
 
-    // 获取用户信息
     var value = wx.getStorageSync('userInfo');
     if (value) {
       this.setData({
         userInfo: value,
         userId: value.nxDistributerUserId,
-      })
+      });
+    }
+
+    var disInfo = wx.getStorageSync('disInfo');
+    if (disInfo) {
+      this.setData({
+        disInfo: disInfo,
+      });
+    }
+  },
+
+  onReady() {
+    const focus = () => this.setData({ searchInputFocus: true });
+    if (typeof wx.nextTick === 'function') {
+      wx.nextTick(focus);
+    } else {
+      setTimeout(focus, 50);
     }
   },
 
@@ -577,7 +606,7 @@ Page({
   confirmInputPurGoods(e){
     const item = e.detail.item;
     load.showLoading("保存采购入库");    
-    item.nxDpgPurUserId = this.data.userInfo.nxDistributerUserId;
+    item.nxDpgPurUserId = this.data.userInfo.nxWeightUserId;
     saveShelfGoodsStock(item).then(res =>{
       if(res.result.code == 0){
         load.hideLoading();
@@ -737,7 +766,7 @@ Page({
       nxDpgInputType: 1,
       nxDpgPurchaseType: 0,
       isShowTools: isShowTools,
-      nxDpgPurUserId: this.data.userInfo ? this.data.userInfo.nxDistributerUserId : null
+      nxDpgPurUserId: this.data.userInfo ? this.data.userInfo.nxWeightUserId : null
     }
     
     // 如果有到货日期，添加
@@ -1122,6 +1151,15 @@ Page({
   toBack() {
     wx.navigateBack({
       delta: 1
+    })
+  },
+
+
+  delSearch() {
+    this.setData({
+      searchString: "",
+      disSearchArr: [],
+      unShelfGoodsList: [],
     })
   },
 

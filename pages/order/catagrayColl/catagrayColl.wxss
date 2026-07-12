@@ -1,0 +1,128 @@
+
+.filterMy{
+  border-radius: 40rpx;
+  padding: 10rpx 40rpx;
+  background: #0f8674;
+  color: #fff;
+  
+}
+.delIcon{
+  position:relative;
+  width: 40rpx;
+  height: 40rpx;
+  margin-top: -60rpx;
+  padding:  -40rpx;
+  margin-left: 20rpx;
+}
+
+
+.flex-column-center {
+  display: flex;
+  flex-flow: column nowrap;
+  /* justify-content: space-around; */
+  justify-content: center;
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.hide{
+  display: none;
+}
+
+.show{
+  display: block;
+}
+
+
+.left-item {
+  background-color: #eee;
+  padding: 30rpx 10rpx;
+  background-color: #f8f9fa; /* 浅灰白色背景，比 #eee 更清晰，适合数据展示 */
+  transition: all 0.2s; /* 添加过渡效果 */
+  box-sizing: border-box; /* 确保边框包含在宽度内 */
+  border-left: 6rpx solid transparent; /* 预留边框空间，使用透明边框 */
+  text-align: center; /* 文字居中 */
+  font-size: 28rpx; /* 设置字体大小 */
+  line-height: 1.4; /* 设置行高 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #1a1a1a; /* 更深的黑色文字，确保清晰可读 */
+}
+
+.left-active {
+  background-color: #fff;
+  /* border-left: 6rpx solid #167063; */
+  background-color: #e6f7f0 !important; /* 更鲜明的绿色背景，选中状态更明显 */
+  font-weight: 700; /* 加粗文字，更突出 */
+  color: #167063 !important; /* 绿色文字，与背景形成对比 */
+  box-shadow: 0 2rpx 6rpx rgba(22, 112, 99, 0.15); /* 添加轻微阴影，增强层次感 */
+}
+
+
+.fatherGoods {
+  font-size: 26rpx;
+  text-align: center;
+  padding: 10rpx;
+  margin-right: 20rpx;
+  margin-bottom: 10rpx;
+  border: 1px solid rgb(206, 206, 206);
+  border-radius: 8rpx;
+  background-color: #fff;
+}
+
+.is-active {
+  background-color: #187e6e;
+  color: #ffffff;
+}
+
+.out_goods{
+  border-radius: 20rpx;
+  border: 1px solid gray;
+  padding: 10rpx 10rpx;
+ 
+}
+
+/* 打印按钮样式 */
+.print-button-container {
+  position: fixed;
+  top: 200rpx;
+  right: 20rpx;
+  z-index: 999;
+}
+
+.print-button {
+  width: 80rpx;
+  height: 80rpx;
+  background-color: #167063;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.2);
+}
+
+.print-button .icon {
+  width: 50rpx;
+  height: 50rpx;
+}
+
+/* 右侧内容区域选中状态 - 给整个分类区域添加淡绿色背景 */
+.category-section-active {
+  background-color: #f0fdf4 !important; /* 淡绿色背景，与左侧菜单呼应 */
+  box-sizing: border-box; /* 确保不会因为任何样式改变宽度 */
+}
+
+/* 右侧内容区域选中状态下的商品项，覆盖 bg-white */
+.category-section-active .bg-white {
+  background-color: #f0fdf4 !important; /* 与选中区域背景色一致，淡绿色 */
+  border: 1px solid #d4edda; /* 添加浅绿色边框，增强选中效果 */
+  border-radius: 8rpx; /* 添加圆角，更美观 */
+  margin: 4rpx 0; /* 添加间距，更清晰 */
+}
+
+

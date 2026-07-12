@@ -1,7 +1,29 @@
-/* 搜索框容器 */
+/* 搜索框：fixed 贴导航栏下方，整页滚动时始终可见 */
 .search-container {
   padding: 30rpx;
   background-color: #f0f9ff;
+  box-sizing: border-box;
+}
+
+.search-container--fixed {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  width: 100%;
+}
+
+.shelf-search-main {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 0;
+  flex: 1;
+}
+
+/* 仅占位，不参与伸缩，避免与固定搜索区之间出现双倍空白 */
+.shelf-search-flow-spacer {
+  width: 100%;
+  flex-shrink: 0;
 }
 
 .search-wrapper {
@@ -16,6 +38,7 @@
   border: 2rpx solid #e5e7eb;
   padding: 0 24rpx;
   height: 88rpx;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.04);
@@ -128,9 +151,12 @@
 
 .shelf-list-info {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 12rpx;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 .shelf-list-title {
@@ -149,9 +175,88 @@
 
 .shelf-list-title-text {
   display: flex;
-  align-items: baseline;
+  flex-direction: column;
+  align-items: stretch;
   gap: 12rpx;
+}
+
+.shelf-list-line-full {
+  flex: 0 0 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 层级 Lx-x 与品牌、商品名同一行；名称区 flex:1 可换行 */
+.shelf-list-title-line1 {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.shelf-title-prefix,
+.shelf-title-brand {
+  flex-shrink: 0;
+  line-height: 1.35;
+}
+
+.shelf-title-name-wrap {
+  flex: 1;
+  min-width: 0;
+  overflow: visible;
+}
+
+.shelf-title-name-text {
+  display: block;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+.shelf-list-spec-carton-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
   flex-wrap: wrap;
+  min-width: 0;
+  gap: 0 8rpx;
+  row-gap: 6rpx;
+}
+
+.shelf-list-spec-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.shelf-list-spec-gap {
+  flex-shrink: 0;
+  color: #b0b8c2;
+  font-size: 28rpx;
+  line-height: 1.35;
+}
+
+.shelf-list-carton-inline {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.shelf-list-carton-main,
+.shelf-list-carton-unit {
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .shelf-list-name {
