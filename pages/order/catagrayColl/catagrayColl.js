@@ -113,7 +113,7 @@ Page({
         scrollTopLeft: 0, //  左边滚动位置随着右边分类而滚动
         scrollTopRight: 0, // 右边滚动位置，用于精确控制滚动到顶部
         isProgrammaticScroll: false, // 标记是否是程序化滚动，防止 scrollToShelf 干扰
-        collNxDisId: options.collNxDisId,
+        requestDisId: options.requestDisId,
         nxDisId: options.disId,
         collNxDisName: options.collNxDisName,
         hasSelectedCustomer: false, // 初始化客户选择状态
@@ -152,7 +152,7 @@ Page({
       load.showLoading("获取数据中");
       stockerGetCategoryListWithCollNxDisId({
         nxDisId: this.data.nxDisId,
-        collNxDisId: this.data.collNxDisId,
+        requestDisId: this.data.requestDisId,
       }).then(res => {
         load.hideLoading();
         console.log("========= 分类列表接口返回结果 =========");
@@ -260,7 +260,7 @@ Page({
         return stockerGetCategoryGoodsDetailWithCooNxDisId({
           categoryId: categoryId,
           nxDisId: this.data.nxDisId,
-          collNxDisId: this.data.collNxDisId
+          requestDisId: this.data.requestDisId
 
         }).then(res => {
           console.log(`分类[${categoryIndex}]接口返回:`, res);
@@ -439,8 +439,8 @@ Page({
             nxDoRemark: order.nxDoRemark,
             nxDoPrintStandard: order.nxDoPrintStandard,
             pickDetail: order.pickDetail,
-            nxDoCollaborativeDistributerName: order.nxDoCollaborativeDistributerName,
-            nxDoCollaborativeNxDisId: order.nxDoCollaborativeNxDisId,
+            nxDoRequestDistributerName: order.nxDoRequestDistributerName,
+            nxDoRequestDisId: order.nxDoRequestDisId,
             nxDoDistributerId: order.nxDoDistributerId,
             // 将扁平化字符串转换为嵌套对象
             nxDepartmentEntity: this.parseDepName(order.depName),
@@ -1014,7 +1014,7 @@ Page({
           // 打印订单信息（单个订单）
           // 收集客户名称（协作订单：协作商名称 + nxDepartmentAttrName）
           var depName = order.nxDepartmentEntity ? (order.nxDepartmentEntity.nxDepartmentAttrName || order.nxDepartmentEntity.nxDepartmentName || '') : '';
-          var customerName = (order.nxDoCollaborativeDistributerName || '') + depName;
+          var customerName = (order.nxDoRequestDistributerName || '') + depName;
          
           
           if (customerName) {
@@ -1194,6 +1194,26 @@ Page({
         return;
       }
 
+      // 协作订单也统一使用二维码标签布局；二维码内容为 nxDepartmentOrdersId。
+      try {
+        const labelPrinter = require('../../../utils/labelPrinter.js');
+        const printData = labelPrinter.quickPrint(orderArray, {
+          paperSizeId: wx.getStorageSync('paperSize') || 1,
+          goodsItem: that.data.item,
+          printRemark: true
+        });
+        if (!printData || !printData.length) {
+          wx.showToast({ title: '打印数据为空', icon: 'none' });
+          return;
+        }
+        that.sendPrintData(printData);
+        return;
+      } catch (error) {
+        console.error('[doPrint] 二维码标签生成失败:', error);
+        wx.showToast({ title: '打印数据生成失败', icon: 'none' });
+        return;
+      }
+
       // 使用TSC命令打印（标签打印机）
       var tsc = require("../../../utils/GPutils/tsc.js").jpPrinter;
       var command = tsc.createNew();
@@ -1284,7 +1304,7 @@ Page({
           // 获取客户名称（协作订单：协作商名称 + nxDepartmentAttrName）
           var customerName = '';
           var depName = order.nxDepartmentEntity ? (order.nxDepartmentEntity.nxDepartmentAttrName || order.nxDepartmentEntity.nxDepartmentName || '') : '';
-          customerName = (order.nxDoCollaborativeDistributerName || '') + depName;
+          customerName = (order.nxDoRequestDistributerName || '') + depName;
           console.log('客户名称:', customerName);
           
           // 小尺寸只打印客户名称
@@ -1306,7 +1326,7 @@ Page({
           // 获取当前订单的打印内容（协作订单：协作商名称 + nxDepartmentAttrName）
           var customerName = '';
           var depName = order.nxDepartmentEntity ? (order.nxDepartmentEntity.nxDepartmentAttrName || order.nxDepartmentEntity.nxDepartmentName || '') : '';
-          customerName = (order.nxDoCollaborativeDistributerName || '') + depName;
+          customerName = (order.nxDoRequestDistributerName || '') + depName;
           
           // 商品名称在商品对象中，不在订单对象中
           // 从 this.data.item 获取商品名称（这是商品对象，包含 nxDgGoodsName）

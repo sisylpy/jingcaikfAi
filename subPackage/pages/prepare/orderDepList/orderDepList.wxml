@@ -6,7 +6,7 @@
 
     <!-- empty -->
 
-    <view class="emptyView {{nxDepArr.length == 0  && gbDepArr.length == 0 && offerArr.length == 0? 'is-active' : ''}}"
+    <view class="emptyView {{nxDepArr.length == 0  && gbDepArr.length == 0 && requestArr.length == 0? 'is-active' : ''}}"
       style="height: {{windowHeight - 360}}rpx; text-align:center;">
       <view class="font-lg empty_view ">
         <view class="flex-column-center">
@@ -33,7 +33,7 @@
     </view>
 
 
-    <view class="flex-row-between p-20 border-bottom bg-white" wx:for="{{offerArr}}" wx:key="nxDistributerId" bind:tap="toNxDisOrders" data-id="{{item.nxDistributerId}}" >
+    <view class="flex-row-between p-20 border-bottom bg-white" wx:for="{{requestArr}}" wx:key="nxDistributerId" bind:tap="toNxDisOrders" data-id="{{item.nxDistributerId}}" >
      
      <view class="flex-column">
           <view class="flex-row" style="width: {{windowWidth - 120}}rpx; ">

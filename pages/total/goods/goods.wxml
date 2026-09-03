@@ -96,7 +96,7 @@
                 <view class="flex-column" wx:for="{{sons.nxDepartmentOrdersEntities}}" wx:key="nxDepartmentOrdersId"
                   wx:for-item="orders">
                   <view class="flex flex-row">
-                    <block wx:if="{{orders.nxDoCollaborativeNxDisId ==  -1}}">
+                    <block wx:if="{{orders.nxDoRequestDisId ==  -1}}">
                       <block wx:if="{{orders.gbDepartmentEntity !== null}}">
                         <view class="flex-row-wrap m-10 third-row ">
                           <text
@@ -115,7 +115,7 @@
                     </block>
                     <block wx:else="">
                       <view class="flex-row-wrap m-10 half-row">
-                        <text class="longword">[{{orders.nxDoCollaborativeDistributerName}}]</text>
+                        <text class="longword">[{{orders.nxDoRequestDistributerName}}]</text>
                       </view>
                     </block>
 
@@ -223,7 +223,7 @@
                   wx:for="{{(shelfGoods.nxDistributerGoodsEntity && shelfGoods.nxDistributerGoodsEntity.nxDepartmentOrdersEntities) || []}}"
                   wx:key="nxDepartmentOrdersId" wx:for-item="orders">
                   <view class="flex flex-row">
-                    <block wx:if="{{orders.nxDoCollaborativeNxDisId == -1}}">
+                    <block wx:if="{{orders.nxDoRequestDisId == -1}}">
                       <block wx:if="{{orders.gbDepartmentEntity !== null}}">
                         <view class="flex-row-wrap m-10 half-row">
                           <text
@@ -242,7 +242,7 @@
                     </block>
                     <block wx:else="">
                       <view class="flex-row-wrap m-10 half-row">
-                        <text class="longword">[{{orders.nxDoCollaborativeDistributerName}}]</text>
+                        <text class="longword">[{{orders.nxDoRequestDistributerName}}]</text>
                       </view>
                     </block>
 

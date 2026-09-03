@@ -1,4 +1,6 @@
 
+@import "../../../customer-standard-order.wxss";
+
 .filterMy{
   border-radius: 40rpx;
   padding: 10rpx 40rpx;
@@ -94,5 +96,3 @@
   width: 50rpx;
   height: 50rpx;
 }
-
-

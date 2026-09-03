@@ -78,6 +78,10 @@ Component({
   scrollTriggerThreshold: 80,  // 滚动触发阈值（rpx转px后约40-50px），增大阈值避免误判和频繁切换
   loadedOffsets: [],   // 已加载分类的 offsetTop 数组，用于二分查找 [{index, top}]
   _loadingNextCategory: false, // 全局加载锁，避免频繁触发加载
+  showCustomerStandard: false,
+  standardOrder: null,
+  standardGoodsName: '',
+  standardCustomerName: '',
   },
 
   lifetimes: {
@@ -210,6 +214,26 @@ Component({
 
 
   methods: {  
+
+    openCustomerStandard(e) {
+      const detail = e.detail || {};
+      const dataset = e.currentTarget ? e.currentTarget.dataset : {};
+      const order = detail.order || dataset.order;
+      if (!order || !order.nxDoDepDisGoodsId) {
+        wx.showToast({ title: '订单缺少客户商品关系', icon: 'none' });
+        return;
+      }
+      this.setData({
+        showCustomerStandard: true,
+        standardOrder: order,
+        standardGoodsName: detail.goodsName || dataset.goodsName || '',
+        standardCustomerName: order.depName || order.gbDepName || ''
+      });
+    },
+
+    closeCustomerStandard() {
+      this.setData({ showCustomerStandard: false });
+    },
 
     /**
      * 获取部门 ID 字符串（辅助方法，抽取重复逻辑）
@@ -532,11 +556,16 @@ Component({
           // 转换订单信息：orders -> nxDepartmentOrdersEntities
           nxDepartmentOrdersEntities: (goods.orders || []).map(order => ({
             nxDepartmentOrdersId: order.nxDepartmentOrdersId,
+            nxDoDepDisGoodsId: order.nxDoDepDisGoodsId,
             nxDoQuantity: order.nxDoQuantity,
             nxDoStandard: order.nxDoStandard,
             nxDoWeight: order.nxDoWeight,
             nxDoRemark: order.nxDoRemark,
             nxDoPrintStandard: order.nxDoPrintStandard,
+            depName: order.depName,
+            gbDepName: order.gbDepName,
+            customerStandardText: order.customerStandardText,
+            hasCustomerStandard: order.hasCustomerStandard,
             // 将扁平化字符串转换为嵌套对象
             nxDepartmentEntity: this.parseDepName(order.depName),
             gbDepartmentEntity: this.parseGbDepName(order.gbDepName),
@@ -1289,6 +1318,27 @@ Component({
           title: '打印机特征值缺失，请重新设置',
           icon: 'none'
         });
+        return;
+      }
+
+      // 统一走标签工具：每个订单一张标签，并在右上角打印订单 ID 二维码。
+      // 标签工具同时缩小商品名称、重排客户/数量/备注，避免二维码与文字重叠。
+      try {
+        const labelPrinter = require('../../../utils/labelPrinter.js');
+        const printData = labelPrinter.quickPrint(orderArray, {
+          paperSizeId: wx.getStorageSync('paperSize') || 1,
+          goodsItem: that.data.item,
+          printRemark: true
+        });
+        if (!printData || !printData.length) {
+          wx.showToast({ title: '打印数据为空', icon: 'none' });
+          return;
+        }
+        that.sendPrintData(printData);
+        return;
+      } catch (error) {
+        console.error('[doPrint] 二维码标签生成失败:', error);
+        wx.showToast({ title: '打印数据生成失败', icon: 'none' });
         return;
       }
 

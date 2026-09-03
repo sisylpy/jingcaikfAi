@@ -1,0 +1,89 @@
+<view class="standard-viewer-mask" wx:if="{{show}}" catchtap="closeViewer" catchtouchmove="stopEvent">
+  <view class="standard-viewer-sheet" catchtap="stopEvent">
+    <view class="viewer-header">
+      <view class="viewer-heading">
+        <text class="viewer-title">客户商品标准</text>
+        <text class="viewer-goods">{{goodsName}}</text>
+        <text class="viewer-customer" wx:if="{{customerName}}">{{customerName}}</text>
+      </view>
+      <view class="viewer-close" catchtap="closeViewer">×</view>
+    </view>
+
+    <view class="viewer-loading" wx:if="{{loading}}">
+      <view class="viewer-loading-dot"></view>
+      <text>正在加载客户标准</text>
+    </view>
+
+    <view class="viewer-error" wx:elif="{{errorMessage}}">
+      <text>{{errorMessage}}</text>
+      <view class="viewer-retry" catchtap="retryLoad">重新加载</view>
+    </view>
+
+    <view class="viewer-empty" wx:elif="{{!hasContent}}">
+      <text class="viewer-empty-title">暂无客户商品标准</text>
+      <text class="viewer-empty-desc">本次仍请注意订单备注和拣货要求。</text>
+    </view>
+
+    <scroll-view class="viewer-scroll" scroll-y wx:else enhanced show-scrollbar="{{false}}">
+      <view class="viewer-content">
+        <view class="dimension-card" wx:for="{{standardGroups}}" wx:key="code" wx:for-item="group">
+          <view class="dimension-header">
+            <text class="dimension-name">{{group.name}}</text>
+            <text class="dimension-count">{{group.items.length}}条</text>
+          </view>
+
+          <view class="requirement-card {{item.importanceLevel === 5 ? 'critical' : ''}}"
+            wx:for="{{group.items}}" wx:key="itemId" wx:for-item="item">
+            <view class="requirement-main">
+              <text class="requirement-text">{{item.requirementText}}</text>
+              <view class="importance level-{{item.importanceLevel}}">
+                <text>{{item.stars}}</text>
+                <text wx:if="{{item.importanceLevel === 5}}"> 关键</text>
+              </view>
+            </view>
+
+            <view class="image-section" wx:for="{{item.imageSections}}" wx:key="role" wx:for-item="section">
+              <view class="image-role role-{{section.className}}">
+                <text>{{section.name}}</text>
+                <text wx:if="{{section.role === 'PROHIBITED'}}"> · 这个样子不能给客户</text>
+              </view>
+              <view class="image-grid">
+                <view class="image-card {{section.role === 'PROHIBITED' ? 'prohibited' : ''}}"
+                  wx:for="{{section.images}}" wx:key="imageId" wx:for-item="standardImage">
+                  <image class="standard-image" src="{{standardImage.previewUrl}}" mode="aspectFill"></image>
+                  <text class="image-description" wx:if="{{standardImage.description}}">{{standardImage.description}}</text>
+                  <text class="prohibited-tag" wx:if="{{section.role === 'PROHIBITED'}}">禁止</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view class="dimension-card" wx:if="{{generalImageSections.length}}">
+          <view class="dimension-header">
+            <text class="dimension-name">整体参考</text>
+            <text class="dimension-count">图片标准</text>
+          </view>
+          <view class="requirement-card">
+            <view class="image-section" wx:for="{{generalImageSections}}" wx:key="role" wx:for-item="section">
+              <view class="image-role role-{{section.className}}">
+                <text>{{section.name}}</text>
+                <text wx:if="{{section.role === 'PROHIBITED'}}"> · 这个样子不能给客户</text>
+              </view>
+              <view class="image-grid">
+                <view class="image-card {{section.role === 'PROHIBITED' ? 'prohibited' : ''}}"
+                  wx:for="{{section.images}}" wx:key="imageId" wx:for-item="standardImage">
+                  <image class="standard-image" src="{{standardImage.previewUrl}}" mode="aspectFill"></image>
+                  <text class="image-description" wx:if="{{standardImage.description}}">{{standardImage.description}}</text>
+                  <text class="prohibited-tag" wx:if="{{section.role === 'PROHIBITED'}}">禁止</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+        <view class="viewer-safe-space"></view>
+      </view>
+    </scroll-view>
+
+  </view>
+</view>

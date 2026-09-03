@@ -753,9 +753,9 @@ Component({
               nxDoRemark: order.nxDoRemark,
               nxDoPrintStandard: order.nxDoPrintStandard,
               pickDetail: order.pickDetail,
-              nxDoCollaborativeDistributerName: order.nxDoCollaborativeDistributerName,
-              nxDoCollaborativeDistributerName: order.nxDoCollaborativeDistributerName,
-              nxDoCollaborativeNxDisId: order.nxDoCollaborativeNxDisId,
+              nxDoRequestDistributerName: order.nxDoRequestDistributerName,
+              nxDoRequestDistributerName: order.nxDoRequestDistributerName,
+              nxDoRequestDisId: order.nxDoRequestDisId,
               nxDoDistributerId: order.nxDoDistributerId,
               nxDepartmentEntity: this.parseDepName(order.depName),
               gbDepartmentEntity: this.parseGbDepName(order.gbDepName),
@@ -1163,8 +1163,8 @@ Component({
           nxDoRemark: order.nxDoRemark,
           nxDoPrintStandard: order.nxDoPrintStandard,
           pickDetail: order.pickDetail,
-          nxDoCollaborativeDistributerName: order.nxDoCollaborativeDistributerName,
-          nxDoCollaborativeNxDisId: order.nxDoCollaborativeNxDisId,
+          nxDoRequestDistributerName: order.nxDoRequestDistributerName,
+          nxDoRequestDisId: order.nxDoRequestDisId,
           nxDoDistributerId: order.nxDoDistributerId,
           // 将扁平化字符串转换为嵌套对象
           nxDepartmentEntity: this.parseDepName(order.depName),
@@ -2280,10 +2280,10 @@ Component({
             
             // 打印订单信息（单个订单）
             var customerName = '';
-            if (order.nxDoCollaborativeNxDisId != null && order.nxDoCollaborativeNxDisId !== -1 && order.nxDoCollaborativeDistributerName) {
+            if (order.nxDoRequestDisId != null && order.nxDoRequestDisId !== -1 && order.nxDoRequestDistributerName) {
               // 协作订单：协作商名称 + nxDepartmentAttrName
               var depName = order.nxDepartmentEntity ? (order.nxDepartmentEntity.nxDepartmentAttrName || order.nxDepartmentEntity.nxDepartmentName || '') : '';
-              customerName = order.nxDoCollaborativeDistributerName + (depName ? depName : '');
+              customerName = order.nxDoRequestDistributerName + (depName ? depName : '');
             } else if (order.gbDepartmentEntity !== null) {
               customerName = order.gbDepartmentEntity.gbDepartmentAttrName;
             } else if (order.nxDepartmentEntity !== null) {
@@ -2363,10 +2363,10 @@ Component({
             
             // 打印订单信息（单个订单）
             var customerName = '';
-            if (order.nxDoCollaborativeNxDisId != null && order.nxDoCollaborativeNxDisId !== -1 && order.nxDoCollaborativeDistributerName) {
+            if (order.nxDoRequestDisId != null && order.nxDoRequestDisId !== -1 && order.nxDoRequestDistributerName) {
               // 协作订单：协作商名称 + nxDepartmentAttrName
               var depName = order.nxDepartmentEntity ? (order.nxDepartmentEntity.nxDepartmentAttrName || order.nxDepartmentEntity.nxDepartmentName || '') : '';
-              customerName = order.nxDoCollaborativeDistributerName + (depName ? depName : '');
+              customerName = order.nxDoRequestDistributerName + (depName ? depName : '');
             } else if (order.gbDepartmentEntity !== null) {
               customerName = order.gbDepartmentEntity.gbDepartmentAttrName;
             } else if (order.nxDepartmentEntity !== null) {
@@ -2434,10 +2434,10 @@ Component({
             
             // 打印订单信息（单个订单）
             var customerName = '';
-            if (order.nxDoCollaborativeNxDisId != null && order.nxDoCollaborativeNxDisId !== -1 && order.nxDoCollaborativeDistributerName) {
+            if (order.nxDoRequestDisId != null && order.nxDoRequestDisId !== -1 && order.nxDoRequestDistributerName) {
               // 协作订单：协作商名称 + nxDepartmentAttrName
               var depName = order.nxDepartmentEntity ? (order.nxDepartmentEntity.nxDepartmentAttrName || order.nxDepartmentEntity.nxDepartmentName || '') : '';
-              customerName = order.nxDoCollaborativeDistributerName + (depName ? depName : '');
+              customerName = order.nxDoRequestDistributerName + (depName ? depName : '');
             } else if (order.gbDepartmentEntity !== null) {
               customerName = order.gbDepartmentEntity.gbDepartmentAttrName;
             } else if (order.nxDepartmentEntity !== null) {
@@ -3296,9 +3296,9 @@ Component({
           
           var customerName = '';
           // 协作订单：协作商名称 + nxDepartmentAttrName
-          if (order.nxDoCollaborativeNxDisId != null && order.nxDoCollaborativeNxDisId !== -1 && order.nxDoCollaborativeDistributerName) {
+          if (order.nxDoRequestDisId != null && order.nxDoRequestDisId !== -1 && order.nxDoRequestDistributerName) {
             var depName = order.nxDepartmentEntity ? (order.nxDepartmentEntity.nxDepartmentAttrName || order.nxDepartmentEntity.nxDepartmentName || '') : '';
-            customerName = order.nxDoCollaborativeDistributerName + (depName ? depName : '');
+            customerName = order.nxDoRequestDistributerName + (depName ? depName : '');
           } else if (order.gbDepartmentEntity) {
             // 优先使用 nxDepartmentAttrName/gbDepartmentAttrName，如果没有则使用 nxDepartmentName/gbDepartmentName
             customerName = order.gbDepartmentEntity.gbDepartmentAttrName || 
@@ -3436,9 +3436,9 @@ Component({
           var order = orderArray[i];
           var customerName = '';
           // 协作订单：协作商名称 + nxDepartmentAttrName
-          if (order.nxDoCollaborativeNxDisId != null && order.nxDoCollaborativeNxDisId !== -1 && order.nxDoCollaborativeDistributerName) {
+          if (order.nxDoRequestDisId != null && order.nxDoRequestDisId !== -1 && order.nxDoRequestDistributerName) {
             var depName = order.nxDepartmentEntity ? (order.nxDepartmentEntity.nxDepartmentAttrName || order.nxDepartmentEntity.nxDepartmentName || '') : '';
-            customerName = order.nxDoCollaborativeDistributerName + (depName ? depName : '');
+            customerName = order.nxDoRequestDistributerName + (depName ? depName : '');
           } else if (order.gbDepartmentEntity) {
             // 优先使用 nxDepartmentAttrName/gbDepartmentAttrName，如果没有则使用 nxDepartmentName/gbDepartmentName
             customerName = order.gbDepartmentEntity.gbDepartmentAttrName || 

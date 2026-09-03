@@ -23,6 +23,10 @@ Page({
   positionId: '',       // 右侧滚动定位ID
   hasSelectedCustomer: false, // 是否有选择客户
   printOk: false,      // 打印机是否已连接
+  showCustomerStandard: false,
+  standardOrder: null,
+  standardGoodsName: '',
+  standardCustomerName: '',
 
   },
 
@@ -59,7 +63,7 @@ Page({
         scrollHeight: 0, // 滚动视图的高度
         toView: 'position0', // 滚动视图跳转的位置
         scrollTopLeft: 0, //  左边滚动位置随着右边分类而滚动
-        collNxDisId: options.collNxDisId,
+        requestDisId: options.requestDisId,
         nxDisId: options.disId,
         printOk: printOk // 打印机连接状态
       })
@@ -87,7 +91,7 @@ Page({
     _initNxDataKf() {
     
       var data = {
-        collNxDisId: this.data.collNxDisId,
+        requestDisId: this.data.requestDisId,
         nxDisId: this.data.nxDisId,
       }
       console.log("nxnxnxnnxnxnxnxnnxnxnaaaa");
@@ -109,6 +113,43 @@ Page({
           })
         }
       })
+    },
+
+    openCustomerStandard(e) {
+      const detail = e.detail || {};
+      const dataset = e.currentTarget ? e.currentTarget.dataset : {};
+      const order = detail.order || dataset.order;
+      if (!order || !order.nxDoDepDisGoodsId) {
+        wx.showToast({ title: '订单缺少客户商品关系', icon: 'none' });
+        return;
+      }
+      this.setData({
+        showCustomerStandard: true,
+        standardOrder: order,
+        standardGoodsName: detail.goodsName || dataset.goodsName || '',
+        standardCustomerName: this.getCustomerName(order)
+      });
+    },
+
+    closeCustomerStandard() {
+      this.setData({ showCustomerStandard: false });
+    },
+
+    getCustomerName(order) {
+      if (order.nxDepartmentEntity) {
+        const dep = order.nxDepartmentEntity;
+        const father = dep.fatherDepartmentEntity;
+        const fatherName = father && (father.nxDepartmentAttrName || father.nxDepartmentName);
+        const depName = dep.nxDepartmentAttrName || dep.nxDepartmentName || '';
+        return fatherName ? fatherName + '.' + depName : depName;
+      }
+      if (order.gbDepartmentEntity) {
+        const dep = order.gbDepartmentEntity;
+        const father = dep.fatherGbDepartmentEntity;
+        const fatherName = father && father.gbDepartmentName;
+        return fatherName ? fatherName + '.' + (dep.gbDepartmentName || '') : (dep.gbDepartmentName || '');
+      }
+      return '';
     },
    
 
@@ -241,7 +282,7 @@ Page({
               
               // 收集客户名称（协作订单：协作商名称 + nxDepartmentAttrName）
               var depName = currentOrder.nxDepartmentEntity ? (currentOrder.nxDepartmentEntity.nxDepartmentAttrName || currentOrder.nxDepartmentEntity.nxDepartmentName || '') : '';
-              var collabName = (currentOrder.nxDoCollaborativeDistributerName || '') + depName;
+              var collabName = (currentOrder.nxDoRequestDistributerName || '') + depName;
               if (collabName && customerNames.indexOf(collabName) === -1) {
                 customerNames.push(collabName);
               }
@@ -268,7 +309,7 @@ Page({
 
                 // 协作订单：协作商名称 + nxDepartmentAttrName
                 var fallbackDepName = fallbackOrder.nxDepartmentEntity ? (fallbackOrder.nxDepartmentEntity.nxDepartmentAttrName || fallbackOrder.nxDepartmentEntity.nxDepartmentName || '') : '';
-                var fallbackCollabName = (fallbackOrder.nxDoCollaborativeDistributerName || '') + fallbackDepName;
+                var fallbackCollabName = (fallbackOrder.nxDoRequestDistributerName || '') + fallbackDepName;
                 if (fallbackCollabName) {
                   fallbackNameParts.push(fallbackCollabName);
                 }

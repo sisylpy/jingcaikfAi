@@ -53,10 +53,10 @@ Page({
       navBarHeight: navBarHeightRpx,
       navbarHeight: navbarHeightRpx, // tabs 高度
       swiperHeight: swiperHeight, // 动态计算的 swiper 高度
-      collNxDisId: options.collNxDisId,
+      requestDisId: options.requestDisId,
       nxDisId: options.disId,
     })
-    //collNxDisId=166
+    //requestDisId=166
     var value = wx.getStorageSync('userInfo');
     console.log(value);
     if (value) {
@@ -81,7 +81,7 @@ Page({
 
   _initData() {
     var data = {
-      collNxDisId: this.data.collNxDisId,
+      requestDisId: this.data.requestDisId,
       nxDisId: this.data.nxDisId,
     }
     load.showLoading("获取订单中")
@@ -111,7 +111,7 @@ Page({
 
   _initDataNot() {
     var data = {
-      collNxDisId: this.data.collNxDisId,
+      requestDisId: this.data.requestDisId,
       nxDisId: this.data.nxDisId,
     }
     load.showLoading("获取订单中")

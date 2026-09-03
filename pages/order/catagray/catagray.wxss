@@ -125,4 +125,5 @@
   margin: 4rpx 0; /* 添加间距，更清晰 */
 }
 
+@import "../../../customer-standard-order.wxss";
 

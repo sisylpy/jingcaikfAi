@@ -13,6 +13,7 @@
        <text wx:if="{{paperSize == 1}}">小</text>  
        <text wx:elif="{{paperSize == 2}}">中</text>     
         <text wx:elif="{{paperSize == 3}}">大</text>         
+        <text wx:elif="{{paperSize == 4}}">大横</text>
       </view>
       
       </view>
@@ -53,7 +54,7 @@
         </view>
       </view>
 
-      <view class="flex-row-between p-20 border-bottom bg-white" wx:for="{{offerArr}}" wx:key="nxDistributerId" bind:tap="toNxDisOrders" data-id="{{item.nxDistributerId}}" 
+      <view class="flex-row-between p-20 border-bottom bg-white" wx:for="{{requestArr}}" wx:key="nxDistributerId" bind:tap="toNxDisOrders" data-id="{{item.nxDistributerId}}"
       data-name="{{item.nxDistributerShowName}}">
      
      <view class="flex-column">

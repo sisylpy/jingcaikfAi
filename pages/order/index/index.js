@@ -264,7 +264,7 @@ Page({
         
         this.getTabBar().setData({
           stockCount: res.result.data.depOrdersWait,
-          depCount: Number(res.result.data.nxDep.length)  + Number(res.result.data.gbDep.length) +  Number(res.result.data.offerArr.length),
+          depCount: Number(res.result.data.nxDep.length)  + Number(res.result.data.gbDep.length) +  Number(res.result.data.requestArr.length),
           
         })
       
@@ -412,7 +412,7 @@ Page({
         this.setData({
           nxDepArr: res.result.data.nxDep,
           gbDepArr: res.result.data.gbDep,
-          offerArr: res.result.data.offerArr,
+          requestArr: res.result.data.requestArr,
         })
         
         // 检查是否有部门被选中
@@ -423,7 +423,7 @@ Page({
         
         this.getTabBar().setData({
           stockCount: res.result.data.depOrdersWait,
-          depCount: Number(res.result.data.nxDep.length)  + Number(res.result.data.gbDep.length)  +  Number(res.result.data.offerArr.length),
+          depCount: Number(res.result.data.nxDep.length)  + Number(res.result.data.gbDep.length)  +  Number(res.result.data.requestArr.length),
           
         })
       
@@ -510,16 +510,16 @@ Page({
   },  
 
   toNxDisOrders(e){
-    var collNxDisId = e.currentTarget.dataset.id;
+    var requestDisId = e.currentTarget.dataset.id;
     
     if(this.data.disInfo.nxDistributerBusinessTypeId < 2 ){
       wx.navigateTo({
-        url: '../catagrayColl/catagrayColl?collNxDisId='  + collNxDisId + '&disId=' + this.data.disId
+        url: '../catagrayColl/catagrayColl?requestDisId='  + requestDisId + '&disId=' + this.data.disId
         +'&collNxDisName=' + e.currentTarget.dataset.name,
       })
     }else{
       wx.navigateTo({
-        url: '../shelfColl/shelfColl?collNxDisId='+ collNxDisId + '&disId=' + this.data.disId  +'&collNxDisName=' + e.currentTarget.dataset.name,
+        url: '../shelfColl/shelfColl?requestDisId='+ requestDisId + '&disId=' + this.data.disId  +'&collNxDisName=' + e.currentTarget.dataset.name,
       })
     }
 
@@ -1314,9 +1314,9 @@ Page({
       setPaperSize() {
         var that = this;
         wx.showActionSheet({
-          itemList: ['4*3cm（横）', '4*6cm（竖）', '5*8cm（竖）'],
+          itemList: ['4*3cm（横）', '4*6cm（竖）', '5*8cm（竖）', '5*8cm（横）'],
           success: function(res) {
-            var selectedSize = res.tapIndex + 1; // 0,1,2 转为 1,2,3
+            var selectedSize = res.tapIndex + 1;
             that.setData({
               paperSize: selectedSize
             });
@@ -1332,10 +1332,10 @@ Page({
         var sizes = {
           1: { width: 40, height: 32 },  // 4*3cm
           2: { width: 40, height: 62 },  // 4*6cm
-          3: { width: 50, height: 82 }   // 5*8cm
+          3: { width: 50, height: 82 },  // 5*8cm 竖
+          4: { width: 80, height: 52 }   // 5*8cm 横
         };
         return sizes[size] || sizes[1];
       }
 
 })
-

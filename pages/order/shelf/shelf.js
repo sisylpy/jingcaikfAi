@@ -23,6 +23,10 @@ Component({
   positionId: '',       // 右侧滚动定位ID
   hasSelectedCustomer: false, // 是否有选择客户
   printOk: false,      // 打印机是否已连接
+  showCustomerStandard: false,
+  standardOrder: null,
+  standardGoodsName: '',
+  standardCustomerName: '',
 
   },
 
@@ -100,6 +104,45 @@ Component({
 
 
   methods: {
+
+    openCustomerStandard(e) {
+      const detail = e.detail || {};
+      const dataset = e.currentTarget ? e.currentTarget.dataset : {};
+      const order = detail.order || dataset.order;
+      if (!order || !order.nxDoDepDisGoodsId) {
+        wx.showToast({ title: '订单缺少客户商品关系', icon: 'none' });
+        return;
+      }
+      this.setData({
+        showCustomerStandard: true,
+        standardOrder: order,
+        standardGoodsName: detail.goodsName || dataset.goodsName || '',
+        standardCustomerName: this.getCustomerName(order)
+      });
+    },
+
+    closeCustomerStandard() {
+      this.setData({ showCustomerStandard: false });
+    },
+
+    getCustomerName(order) {
+      if (order.depName) return order.depName;
+      if (order.gbDepName) return order.gbDepName;
+      if (order.nxDepartmentEntity) {
+        const dep = order.nxDepartmentEntity;
+        const father = dep.fatherDepartmentEntity;
+        const fatherName = father && (father.nxDepartmentAttrName || father.nxDepartmentName);
+        const depName = dep.nxDepartmentAttrName || dep.nxDepartmentName || '';
+        return fatherName ? fatherName + '.' + depName : depName;
+      }
+      if (order.gbDepartmentEntity) {
+        const dep = order.gbDepartmentEntity;
+        const father = dep.fatherGbDepartmentEntity;
+        const fatherName = father && father.gbDepartmentName;
+        return fatherName ? fatherName + '.' + (dep.gbDepartmentName || '') : (dep.gbDepartmentName || '');
+      }
+      return '';
+    },
 
     _initShelf() {
       // 1. 先拉左侧所有货架

@@ -102,6 +102,13 @@ Component({
    */
   methods: {
 
+    openCustomerStandard(e) {
+      this.triggerEvent('openstandard', {
+        order: e.currentTarget.dataset.order,
+        goodsName: e.currentTarget.dataset.goodsName || (this.data.item && this.data.item.nxDgGoodsName) || ''
+      });
+    },
+
     resetAfterSave(orders = []) {
       if (Array.isArray(orders) && orders.length > 0) {
         this.setData({ focusIndex: 0 });

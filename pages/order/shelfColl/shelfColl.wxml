@@ -74,6 +74,14 @@
                     <text class="mr-10 text-secondary">拣货:</text>
                     <text>{{orders.nxDepartmentDisGoodsEntity.nxDdgPickDetail}}</text>
                   </view>
+                  <view class="picker-standard-brief" wx:if="{{orders.hasCustomerStandard}}">
+                    <view class="picker-standard-copy">
+                      <text class="picker-standard-label">客户要求</text>
+                      <text class="picker-standard-summary">{{orders.customerStandardText || '含图片标准，请查看全部'}}</text>
+                    </view>
+                    <view class="picker-standard-action" catchtap="openCustomerStandard"
+                      data-order="{{orders}}" data-goods-name="{{sons.nxDistributerGoodsEntity.nxDgGoodsName}}">查看全部</view>
+                  </view>
                 </view>
               </view>
             </view>
@@ -97,4 +105,15 @@
 
 
 
-<stockOutGoods id="stockOutGoodsPopup" show="{{showDisOutGoods}}" bindconfirm="confirm" bindconfirmSave="confirmSave" bindneednot="confirmNeedNotPurchse" bindcancle="cancle" item="{{item}}" bindgetFocus="getFocus" bindcancle="cancle" modalHeight="{{windowHeight > maskHeight ? windowHeight : maskHeight }}" scrollViewTop="{{scrollViewTop}}" modalContentHeight="{{modalContentHeight}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" ids="{{ids}}" />
+<stockOutGoods id="stockOutGoodsPopup" show="{{showDisOutGoods}}" bindconfirm="confirm" bindconfirmSave="confirmSave" bindneednot="confirmNeedNotPurchse" bindcancle="cancle" bindopenstandard="openCustomerStandard" item="{{item}}" bindgetFocus="getFocus" bindcancle="cancle" modalHeight="{{windowHeight > maskHeight ? windowHeight : maskHeight }}" scrollViewTop="{{scrollViewTop}}" modalContentHeight="{{modalContentHeight}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" ids="{{ids}}" />
+
+<customer-standard-viewer
+  show="{{showCustomerStandard}}"
+  order="{{standardOrder}}"
+  goods-name="{{standardGoodsName}}"
+  customer-name="{{standardCustomerName}}"
+  distributer-id="{{requestDisId}}"
+  weight-user-id="{{userInfo.nxWeightUserId}}"
+  supplier-id="{{-1}}"
+  bindclose="closeCustomerStandard"
+/>

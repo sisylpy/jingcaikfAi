@@ -15,7 +15,7 @@ Page({
 
   data: {
     changeIds: false,
-    offerArr: []
+    requestArr: []
   },
 
   onLoad: function (options) {
@@ -46,7 +46,7 @@ Page({
         this.setData({
           nxDepArr: res.result.data.nxDep,
           gbDepArr: res.result.data.gbDep,
-          offerArr: res.result.data.offerArr
+          requestArr: res.result.data.requestArr
         })
         // var haveIds = wx.getStorageSync('idsChangeStock');
         // console.log(haveIds);
@@ -54,7 +54,7 @@ Page({
         //   this.setData({
         //     nxDepArr: res.result.data.nxDep,
         //     gbDepArr: res.result.data.gbDep,
-        //     offerArr: res.result.data.offerArr
+        //     requestArr: res.result.data.requestArr
         //   })
         // }else{
         //   console.log("updateupdate");
@@ -214,7 +214,7 @@ Page({
 
   toNxDisOrders(e){
     wx.navigateTo({
-      url: '../collNxOutOrder/collNxOutOrder?collNxDisId=' + e.currentTarget.dataset.id 
+      url: '../collNxOutOrder/collNxOutOrder?requestDisId=' + e.currentTarget.dataset.id
        +'&disId=' + this.data.disId,
     })
   },
