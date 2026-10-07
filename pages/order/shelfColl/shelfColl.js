@@ -1,5 +1,6 @@
 const globalData = getApp().globalData;
 var load = require('../../../lib/load.js');
+var commercialUsage = require('../../../utils/commercialUsage.js');
 import apiUrl from '../../../config.js'
 
 import {
@@ -374,9 +375,9 @@ Page({
             }
             
             that._initNxDataKf();
-          }else{
+          }else if (!commercialUsage.showQuotaExhausted(res.result)) {
             wx.showToast({
-              title: 'res.result.msg',
+              title: res.result.msg || '出库失败',
               icon: 'none'
             })
           }

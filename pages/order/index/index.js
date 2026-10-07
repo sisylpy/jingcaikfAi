@@ -1,6 +1,7 @@
 const globalData = getApp().globalData;
 var load = require('../../../lib/load.js');
 var commercialEntitlement = require('../../../utils/commercialEntitlement.js');
+var commercialUsage = require('../../../utils/commercialUsage.js');
 
 import apiUrl from '../../../config.js'
 
@@ -134,6 +135,7 @@ Page({
               wx.setStorageSync('userInfo', res.result.data.userInfo);
               wx.setStorageSync('commercialEntitlement',
                 res.result.data.commercialEntitlement || null);
+              commercialUsage.saveFromLogin(res.result.data);
               if(res.result.data.userType == 1){
                
                 wx.setStorageSync('disInfo', res.result.data.disInfo);

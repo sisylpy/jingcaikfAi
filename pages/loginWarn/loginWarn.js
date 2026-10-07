@@ -1,6 +1,7 @@
 const globalData = getApp().globalData;
 var load = require('../../lib/load.js');
 const app = getApp();
+var commercialUsage = require('../../utils/commercialUsage.js');
 
 import {
   disAndUserSave,
@@ -303,6 +304,7 @@ Page({
                     wx.setStorageSync('disInfo', res.result.data.disInfo)
                     wx.setStorageSync('commercialEntitlement',
                       res.result.data.commercialEntitlement || null)
+                    commercialUsage.saveFromLogin(res.result.data)
                     app.globalData.userInfo = res.result.data.userInfo;
                     wx.switchTab({
                       url: '../order/index/index',
@@ -400,6 +402,7 @@ Page({
                       wx.setStorageSync('disInfo', res.result.data.disInfo)
                       wx.setStorageSync('commercialEntitlement',
                         res.result.data.commercialEntitlement || null)
+                      commercialUsage.saveFromLogin(res.result.data)
                       app.globalData.userInfo = res.result.data.userInfo;
                       wx.switchTab({
                         url: '../order/index/index',

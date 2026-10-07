@@ -1,5 +1,6 @@
 const globalData = getApp().globalData;
 var load = require('../../../lib/load.js');
+var commercialUsage = require('../../../utils/commercialUsage.js');
 let scrollDdirection = 0; // 用来计算滚动的方向
 
 const tabBarHeight = 50; // 根据实际情况调整
@@ -457,9 +458,9 @@ Component({
               this._initData();
              
             }
-          }else{
+          }else if (!commercialUsage.showQuotaExhausted(res.result)) {
             wx.showToast({
-              title: 'res.result.msg',
+              title: res.result.msg || '出库失败',
               icon: 'none'
             })
           }
