@@ -301,6 +301,8 @@ Page({
                     load.hideLoading()
                     wx.setStorageSync('userInfo', res.result.data.userInfo);
                     wx.setStorageSync('disInfo', res.result.data.disInfo)
+                    wx.setStorageSync('commercialEntitlement',
+                      res.result.data.commercialEntitlement || null)
                     app.globalData.userInfo = res.result.data.userInfo;
                     wx.switchTab({
                       url: '../order/index/index',
@@ -396,6 +398,8 @@ Page({
                     if (res.result.code !== -1) { //注册成功
                       wx.setStorageSync('userInfo', res.result.data.userInfo);
                       wx.setStorageSync('disInfo', res.result.data.disInfo)
+                      wx.setStorageSync('commercialEntitlement',
+                        res.result.data.commercialEntitlement || null)
                       app.globalData.userInfo = res.result.data.userInfo;
                       wx.switchTab({
                         url: '../order/index/index',

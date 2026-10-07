@@ -1,3 +1,5 @@
+var commercialEntitlement = require('../utils/commercialEntitlement.js');
+
 Component({
   data: {
     selected: 0,
@@ -30,6 +32,7 @@ Component({
       // 获取 disInfo 和 userInfo
       var disInfo = wx.getStorageSync('disInfo');
       var userInfo = wx.getStorageSync('userInfo');
+      var entitlement = wx.getStorageSync('commercialEntitlement');
       
       // 尝试从多个位置获取 disBusinessType
       var disBusinessType = null;
@@ -63,8 +66,8 @@ Component({
         }
       ];
       
-      // 如果 disBusinessType > 2(专业货架批发商)，添加货架页面
-      if (disBusinessType !== null && disBusinessType !== undefined && disBusinessType  > 2) {
+      // 套餐只决定是否拥有货架能力，经营形态只决定是否进入货架工作流。
+      if (commercialEntitlement.canUseShelfWorkflow(disInfo, entitlement)) {
         baseList.push({
           "pagePath": "pages/shelf/index/index",
           "text": "货架",

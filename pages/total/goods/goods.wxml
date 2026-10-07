@@ -13,7 +13,7 @@
     <view> </view>
     <view class="flex-row">
       <view class="button-container mr-20" bindtap="changeShowType"
-        wx:if="{{disInfo.nxDistributerBusinessTypeId > 1 && supplierCustomer == null }}">
+        wx:if="{{shelfWorkflowEnabled && supplierCustomer == null }}">
         <image src="{{showType === 'type' ? '/images/icon_goods_active.png' : '/images/tab_classification-2.png'}}"
           mode="aspectFill" class="icon " />
       </view>

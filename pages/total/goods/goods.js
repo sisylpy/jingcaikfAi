@@ -1,4 +1,5 @@
 var load = require('../../../lib/load.js');
+var commercialEntitlement = require('../../../utils/commercialEntitlement.js');
 import apiUrl from '../../../config.js'
 
 import {
@@ -143,10 +144,13 @@ Component({
         var disValue = wx.getStorageSync('disInfo');
         console.log("📦 attached() 中获取 disInfo:", disValue);
         if (disValue) {
+          const shelfWorkflowEnabled = commercialEntitlement.canUseShelfWorkflow(
+            disValue, wx.getStorageSync('commercialEntitlement'));
           this.setData({
             disInfo: disValue,
             disId: disValue.nxDistributerId,
-            supplierId: -1
+            supplierId: -1,
+            shelfWorkflowEnabled: shelfWorkflowEnabled
           })
           if(this.data.showType == 'type'){
             this._initCategoryData();
@@ -2314,7 +2318,7 @@ Component({
             icon: 'none'
           });
         });
-      } else if (that.data.disInfo && that.data.disInfo.nxDistributerBusinessTypeId > 1) {
+      } else if (that.data.shelfWorkflowEnabled) {
         // 根据 disInfo.nxDistributerBusinessTypeId 判断使用哪个接口
         // 如果 > 1，说明是货架配送商，使用 pickerGiveOrderWeightUpdateShelfStock（单个订单接口，需要 shelfId）
         // 货架配送商：使用 pickerGiveOrderWeightUpdateShelfStock 接口（需要 shelfId）

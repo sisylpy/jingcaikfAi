@@ -1,5 +1,6 @@
 const globalData = getApp().globalData;
 var load = require('../../../lib/load.js');
+var commercialEntitlement = require('../../../utils/commercialEntitlement.js');
 
 import apiUrl from '../../../config.js'
 
@@ -86,12 +87,6 @@ Page({
         wx.stopPullDownRefresh()
         wx.setStorageSync('disInfo', res.result.data.disInfo);
         wx.setStorageSync('numberBooks', res.result.data.books)
-        if (res.result.data.disInfo.nxDistributerBuyQuantity < 1) {
-          wx.navigateTo({
-            url: '../../../subPackage/pages/management/payPage/payPage?type=0',
-          })
-        }
-
         // 更新 tabBar 数据
         if (that.getTabBar()) {
         that.getTabBar().setData({
@@ -137,6 +132,8 @@ Page({
             if (res.result.code !== -1) { //登陆成功（内部员工）
               // 登录成功后存储缓存
               wx.setStorageSync('userInfo', res.result.data.userInfo);
+              wx.setStorageSync('commercialEntitlement',
+                res.result.data.commercialEntitlement || null);
               if(res.result.data.userType == 1){
                
                 wx.setStorageSync('disInfo', res.result.data.disInfo);
@@ -494,7 +491,8 @@ Page({
         + '&disId=' + this.data.disId,
       })
     }else{
-      if(this.data.disInfo.nxDistributerBusinessTypeId < 2 ){
+      if(!commercialEntitlement.canUseShelfWorkflow(
+        this.data.disInfo, wx.getStorageSync('commercialEntitlement'))){
         wx.navigateTo({
           url: '../catagray/catagray?supplierId='  + this.data.supplierId + '&disId=' + this.data.disId,
         })
@@ -512,7 +510,8 @@ Page({
   toNxDisOrders(e){
     var requestDisId = e.currentTarget.dataset.id;
     
-    if(this.data.disInfo.nxDistributerBusinessTypeId < 2 ){
+    if(!commercialEntitlement.canUseShelfWorkflow(
+      this.data.disInfo, wx.getStorageSync('commercialEntitlement'))){
       wx.navigateTo({
         url: '../catagrayColl/catagrayColl?requestDisId='  + requestDisId + '&disId=' + this.data.disId
         +'&collNxDisName=' + e.currentTarget.dataset.name,
