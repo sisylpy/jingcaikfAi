@@ -55,3 +55,9 @@ test('picker stock template uses the server query-parameter contract', () => {
   assert.equal(source.includes('downloadShelfStockTemplate/${shelfId}'), false);
   assert.equal(source.includes('downloadShelfStockTemplate?shelfId=${encodeURIComponent(shelfId)}'), true);
 });
+
+test('manual shelf receipt calls the purchase-goods stock endpoint', () => {
+  const source = fs.readFileSync(path.join(__dirname, '../lib/apiDistributer.js'), 'utf8');
+  assert.equal(source.includes("nxdistributerpurchasegoods/saveShelfGoodsStock"), true);
+  assert.equal(source.includes("nxdistributergoodsshelfstock/saveShelfGoodsStock"), false);
+});
