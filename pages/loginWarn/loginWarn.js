@@ -304,6 +304,8 @@ Page({
                     wx.setStorageSync('disInfo', res.result.data.disInfo)
                     wx.setStorageSync('commercialEntitlement',
                       res.result.data.commercialEntitlement || null)
+                    wx.setStorageSync('operatingCapability',
+                      res.result.data.operatingCapability || null)
                     commercialUsage.saveFromLogin(res.result.data)
                     app.globalData.userInfo = res.result.data.userInfo;
                     wx.switchTab({
@@ -402,6 +404,8 @@ Page({
                       wx.setStorageSync('disInfo', res.result.data.disInfo)
                       wx.setStorageSync('commercialEntitlement',
                         res.result.data.commercialEntitlement || null)
+                      wx.setStorageSync('operatingCapability',
+                        res.result.data.operatingCapability || null)
                       commercialUsage.saveFromLogin(res.result.data)
                       app.globalData.userInfo = res.result.data.userInfo;
                       wx.switchTab({

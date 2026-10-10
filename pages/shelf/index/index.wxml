@@ -33,7 +33,7 @@
           <image src="{{isListView ? '/images/liebiao.png' : '/images/suoluetu.png'}}" class="icon"></image>
         </view>
 
-        <block wx:if="{{disInfo.nxDistributerType == -1}}">
+        <block wx:if="{{canInitializeShelfStock}}">
           <view class="button-container mr-20" bindtap="downLoadInitStock">
             <image src="../../../images/Focus-Auto.png" class="icon"></image>
           </view>

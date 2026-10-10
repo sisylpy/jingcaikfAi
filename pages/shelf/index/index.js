@@ -1,4 +1,5 @@
 var load = require('../../../lib/load.js');
+var commercialEntitlement = require('../../../utils/commercialEntitlement.js');
 
 import apiUrl from '../../../config.js'
 import {
@@ -212,6 +213,7 @@ Page({
     /** 货架商品列表查询排序，与接口 shelfGoodsQuerySort 一致，见 lib/apiDistributer getShelfGoods 注释 */
     shelfGoodsQuerySort: 0,
     showShelfQuerySortMenu: false,
+    canInitializeShelfStock: false,
 
   },
 
@@ -258,7 +260,9 @@ Page({
     var disInfo = wx.getStorageSync('disInfo');
     if (disInfo) {
       this.setData({
-        disInfo: disInfo
+        disInfo: disInfo,
+        canInitializeShelfStock: commercialEntitlement.canInitializeShelfStock(
+          disInfo, wx.getStorageSync('operatingCapability'))
       })
     }
     var value = wx.getStorageSync('userInfo');
