@@ -2524,40 +2524,57 @@ Component({
         }).then(res => {
           if (res.result.code == 0) {
             const newShelfList = res.result.data.shelfList || [];
-            const shelfArr = this.data.shelfArr;
-            
-            // 更新每个货架的 goodsCount，保留已加载的商品数据
-            newShelfList.forEach(newShelf => {
-              const existingShelfIndex = shelfArr.findIndex(s => 
-                s.nxDistributerGoodsShelfId === newShelf.nxDistributerGoodsShelfId
+            const currentShelfArr = this.data.shelfArr || [];
+            const currentById = new Map(currentShelfArr.map(shelf => [
+              shelf.nxDistributerGoodsShelfId,
+              shelf
+            ]));
+            const lockedShelf = this.data.clickedLeftMenuIndex !== null
+              ? currentShelfArr[this.data.clickedLeftMenuIndex]
+              : null;
+            const lockedShelfId = lockedShelf
+              ? lockedShelf.nxDistributerGoodsShelfId
+              : null;
+
+            // 服务端列表是待出库货架的最新事实。已完成最后一单的货架不会再返回，
+            // 必须从本地数组删除，避免旧商品卡片继续显示；仍存在的货架保留已加载详情。
+            const refreshedShelfArr = newShelfList.map(newShelf => {
+              const current = currentById.get(newShelf.nxDistributerGoodsShelfId);
+              if (current) {
+                return {
+                  ...current,
+                  ...newShelf
+                };
+              }
+              return {
+                ...newShelf,
+                nxDisGoodsShelfGoodsEntities: [],
+                loaded: false,
+                loading: false,
+                isEmpty: false
+              };
+            });
+            const refreshedLockedIndex = lockedShelfId === null
+              ? null
+              : refreshedShelfArr.findIndex(shelf =>
+                shelf.nxDistributerGoodsShelfId === lockedShelfId
               );
-              
-              if (existingShelfIndex !== -1) {
-                // 更新 newOrderCount 和 hasGoods，保留其他数据
-                // 只有当 newShelf 中存在这些字段时才更新，避免设置为 undefined
-                if (newShelf.newOrderCount !== undefined) {
-                  shelfArr[existingShelfIndex].newOrderCount = newShelf.newOrderCount;
-                }
-                if (newShelf.hasGoods !== undefined) {
-                  shelfArr[existingShelfIndex].hasGoods = newShelf.hasGoods;
-                }
+            const lockRemoved = lockedShelfId !== null && refreshedLockedIndex === -1;
+            const updateData = {
+              shelfArr: refreshedShelfArr
+            };
+            if (lockedShelfId !== null) {
+              updateData.clickedLeftMenuIndex = lockRemoved ? null : refreshedLockedIndex;
+              if (lockRemoved) {
+                updateData.canClickGoods = false;
               }
+            }
+
+            this.setData(updateData, () => {
+              console.log('待出库货架列表已与服务端同步');
+              resolve();
             });
-            
-            // 使用路径更新方式，只更新 goodsCount，避免更新整个数组
-            const updateData = {};
-            shelfArr.forEach((shelf, index) => {
-              // 只更新存在的字段，避免设置 undefined
-              if (shelf.newOrderCount !== undefined) {
-                updateData[`shelfArr[${index}].newOrderCount`] = shelf.newOrderCount;
-              }
-              if (shelf.hasGoods !== undefined) {
-                updateData[`shelfArr[${index}].hasGoods`] = shelf.hasGoods;
-              }
-            });
-            
-            this.setData(updateData);
-            console.log('货架 newOrderCount 已更新');
+            return;
           }
           resolve();
         }).catch(err => {
