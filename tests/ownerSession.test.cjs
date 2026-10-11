@@ -1,6 +1,7 @@
 // Picker 会话凭证：验证自动携带、公开接口放行与不误伤登录流程。
 const test = require('node:test')
 const assert = require('node:assert')
+const fs = require('node:fs')
 const path = require('node:path')
 
 const MODULE_PATH = path.join(__dirname, '..', 'lib', 'ownerSession.js')
@@ -45,6 +46,33 @@ test('登录返回 ownerAuth 时保存服务端签发的凭证', () => {
     assert.strictEqual(store.ownerAccessToken, 'server-issued-token')
     assert.strictEqual(store.ownerTokenExpiresAt, '2099-01-01 00:00:00')
   })
+})
+
+test('称重员登录返回 weigherAuth 时保存独立凭证', () => {
+  withStorage({}, ({ store }) => {
+    const ownerSession = freshModule()
+    const ok = ownerSession.capture({
+      data: {
+        weigherAuth: {
+          accessToken: 'weighter-token',
+          expiresAt: '2099-01-01 00:00:00'
+        }
+      }
+    })
+    assert.strictEqual(ok, true)
+    assert.strictEqual(store.weigherAccessToken, 'weighter-token')
+    assert.strictEqual(store.ownerAccessToken, undefined)
+  })
+})
+
+test('统一称重员登录方法捕获会话且货架页使用称重员主键', () => {
+  const apiSource = fs.readFileSync(path.join(__dirname, '..', 'lib', 'apiDistributer.js'), 'utf8')
+  const loginSource = apiSource.slice(apiSource.indexOf('export const weighterLoginKf'))
+  assert.match(loginSource, /ownerSession\.capture\(res\.data\)/)
+
+  const shelfSource = fs.readFileSync(path.join(__dirname, '..', 'pages', 'shelf', 'index', 'index.js'), 'utf8')
+  assert.match(shelfSource, /userId:\s*value\.nxWeightUserId/)
+  assert.doesNotMatch(shelfSource, /userId:\s*value\.nxDistributerUserId/)
 })
 
 test('登录返回不含 ownerAuth 时不写入任何凭证', () => {

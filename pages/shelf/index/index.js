@@ -274,7 +274,7 @@ Page({
       this.setData({
         disId: disIdFromDisInfo != null ? disIdFromDisInfo : disIdFromUser,
         userInfo: value,
-        userId: value.nxDistributerUserId,
+        userId: value.nxWeightUserId,
       })
       this._getDisShelfs();
 
