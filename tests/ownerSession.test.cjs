@@ -12,7 +12,8 @@ function withStorage(initial, run) {
     getStorageSync: key => (key in store ? store[key] : ''),
     setStorageSync: (key, value) => { store[key] = value },
     removeStorageSync: key => { delete store[key] },
-    request: options => { captured = options; return options }
+    request: options => { captured = options; return options },
+    uploadFile: options => { captured = options; return options }
   }
   global.wx = fakeWx
   try {
@@ -96,6 +97,21 @@ test('调用方已自带凭证时不覆盖', () => {
     })
     assert.strictEqual(getCaptured().header['x-nx-owner-token'], 'explicit-token')
     assert.strictEqual(getCaptured().header['X-NX-Owner-Token'], undefined)
+  })
+})
+test('库存模板上传改写到 Owner 路由并携带称重员凭证', () => {
+  withStorage({ weigherAccessToken: 'weighter-token' }, ({ getCaptured }) => {
+    const ownerSession = freshModule()
+    ownerSession.install()
+    wx.uploadFile({
+      url: 'https://test-api.grainservice.club/nongxinle/api/nxdistributergoodsshelfstock/uploadShelfStock',
+      filePath: '/tmp/stock.xls',
+      name: 'file'
+    })
+    const sent = getCaptured()
+    assert.strictEqual(sent.url,
+      'https://test-api.grainservice.club/nongxinle/api/owner/nxdistributergoodsshelfstock/uploadShelfStock')
+    assert.strictEqual(sent.header['X-NX-Owner-Token'], 'weighter-token')
   })
 })
 test('第三方地址即使含 /api/ 也不携带会话凭证', () => {
