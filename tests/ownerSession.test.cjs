@@ -59,7 +59,7 @@ test('业务请求自动携带 X-NX-Owner-Token', () => {
     const ownerSession = freshModule()
     ownerSession.install()
     wx.request({
-      url: 'https://test.example.com/api/nxdistributergoodsshelf/disGetShelfList/173',
+      url: 'https://test-api.grainservice.club/api/nxdistributergoodsshelf/disGetShelfList/173',
       header: { 'Content-Type': 'application/json' }
     })
     const sent = getCaptured()
@@ -72,7 +72,7 @@ test('登录与注册入口不携带凭证，避免影响身份确认', () => {
   withStorage({ ownerAccessToken: 'server-issued-token' }, ({ getCaptured }) => {
     const ownerSession = freshModule()
     ownerSession.install()
-    wx.request({ url: 'https://test.example.com/api/nxdistributeruser/wxworkLogin', data: {} })
+    wx.request({ url: 'https://test-api.grainservice.club/api/nxdistributeruser/wxworkLogin', data: {} })
     assert.strictEqual(getCaptured().header, undefined)
   })
 })
@@ -81,7 +81,7 @@ test('未登录时不改动请求头，行为与改造前一致', () => {
   withStorage({}, ({ getCaptured }) => {
     const ownerSession = freshModule()
     ownerSession.install()
-    wx.request({ url: 'https://test.example.com/api/nxdistributergoodsshelf/disGetShelfList/173' })
+    wx.request({ url: 'https://test-api.grainservice.club/api/nxdistributergoodsshelf/disGetShelfList/173' })
     assert.strictEqual(getCaptured().header, undefined)
   })
 })
@@ -91,10 +91,18 @@ test('调用方已自带凭证时不覆盖', () => {
     const ownerSession = freshModule()
     ownerSession.install()
     wx.request({
-      url: 'https://test.example.com/api/nxdistributergoodsshelf/disGetShelfList/173',
+      url: 'https://test-api.grainservice.club/api/nxdistributergoodsshelf/disGetShelfList/173',
       header: { 'x-nx-owner-token': 'explicit-token' }
     })
     assert.strictEqual(getCaptured().header['x-nx-owner-token'], 'explicit-token')
     assert.strictEqual(getCaptured().header['X-NX-Owner-Token'], undefined)
+  })
+})
+test('第三方地址即使含 /api/ 也不携带会话凭证', () => {
+  withStorage({ ownerAccessToken: 'server-issued-token' }, ({ getCaptured }) => {
+    const ownerSession = freshModule()
+    ownerSession.install()
+    wx.request({ url: 'https://evil.example.com/api/steal' })
+    assert.strictEqual(getCaptured().header, undefined)
   })
 })
