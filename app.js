@@ -1,9 +1,13 @@
 
 // app.js
+var ownerSession = require('./lib/ownerSession.js');
+
 App({
   onLaunch() {
-    
-  const windowInfo = wx.getWindowInfo();
+    // 先安装会话凭证携带，再发起任何业务请求。
+    ownerSession.install();
+
+  	const windowInfo = wx.getWindowInfo();
 
   var device = wx.getDeviceInfo();
     const isIOS = device.system.indexOf('iOS') > -1;

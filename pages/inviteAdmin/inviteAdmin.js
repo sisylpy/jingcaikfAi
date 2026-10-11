@@ -1,5 +1,6 @@
 const globalData = getApp().globalData;
 var load = require('../../lib/load.js');
+var ownerSession = require('../../lib/ownerSession.js');
 var utils = require('../../utils/util')
 const app = getApp();
 
@@ -243,6 +244,8 @@ Page({
               if (res.result.code !== -1) { //登陆成功
                 console.log(res.result.data);
                 wx.setStorageSync('userInfo', res.result.data.userInfo);
+                // 保存服务端签发的员工会话凭证，后续请求由 ownerSession 自动携带。
+                ownerSession.capture(res.result.data);
                 wx.setStorageSync('disInfo', res.result.data.disInfo)
                 wx.switchTab({
                   url: '../stock/index/index',

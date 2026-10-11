@@ -1,5 +1,6 @@
 const globalData = getApp().globalData;
 var load = require('../../lib/load.js');
+var ownerSession = require('../../lib/ownerSession.js');
 const app = getApp();
 var commercialUsage = require('../../utils/commercialUsage.js');
 
@@ -229,6 +230,8 @@ Page({
           .then((res) => {
             if (res.result.code !== -1) { //登陆成功
               wx.setStorageSync('userInfo', res.result.data.userInfo);
+              // 保存服务端签发的员工会话凭证，后续请求由 ownerSession 自动携带。
+              ownerSession.capture(res.result.data);
               wx.setStorageSync('disInfo', res.result.data.disInfo)
               app.globalData.userInfo = res.result.data.userInfo;
               wx.switchTab({
@@ -282,7 +285,7 @@ Page({
                 nxDistributerLan: this.data.latitude,
                 nxDistributerLun: this.data.longitude,
                 nxDistributerPhone: this.data.phone,
-                nxDistributerBusinessTypeId: this.data.typeId,
+                nxDistributerOperatingModeCode: 'SMALL_WHOLESALE',
                 nxDistributerType: this.data.type,
                 isSelected: this.data.down,
                 nxDistributerServiceCityEntities: serviceArr,
@@ -301,6 +304,8 @@ Page({
                   if (res.result.code !== -1) { //注册成功
                     load.hideLoading()
                     wx.setStorageSync('userInfo', res.result.data.userInfo);
+              // 保存服务端签发的员工会话凭证，后续请求由 ownerSession 自动携带。
+              ownerSession.capture(res.result.data);
                     wx.setStorageSync('disInfo', res.result.data.disInfo)
                     wx.setStorageSync('commercialEntitlement',
                       res.result.data.commercialEntitlement || null)
@@ -380,7 +385,7 @@ Page({
                   nxDistributerLan: this.data.latitude,
                   nxDistributerLun: this.data.longitude,
                   nxDistributerPhone: this.data.phone,
-                  nxDistributerBusinessTypeId: this.data.typeId,
+                  nxDistributerOperatingModeCode: 'SMALL_WHOLESALE',
                   nxDistributerType: this.data.type,
                   isSelected: this.data.down,
                   nxDistributerServiceCityEntities: serviceArr,
@@ -401,6 +406,8 @@ Page({
                     wx.hideLoading()
                     if (res.result.code !== -1) { //注册成功
                       wx.setStorageSync('userInfo', res.result.data.userInfo);
+              // 保存服务端签发的员工会话凭证，后续请求由 ownerSession 自动携带。
+              ownerSession.capture(res.result.data);
                       wx.setStorageSync('disInfo', res.result.data.disInfo)
                       wx.setStorageSync('commercialEntitlement',
                         res.result.data.commercialEntitlement || null)
@@ -467,6 +474,8 @@ Page({
             .then((res) => {
               if (res.result.code !== -1) { //登陆成功
                 wx.setStorageSync('userInfo', res.result.data.userInfo);
+              // 保存服务端签发的员工会话凭证，后续请求由 ownerSession 自动携带。
+              ownerSession.capture(res.result.data);
                 wx.setStorageSync('disInfo', res.result.data.disInfo)
                 app.globalData.userInfo = res.result.data.userInfo;
                 wx.switchTab({
